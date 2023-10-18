@@ -33,9 +33,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware;
-
-
 /**
  * This OpMode Sample illustrates how to use an external "hardware" class to modularize all the robot's sensors and actuators.
  * This approach is very efficient because the same hardware class can be used by all of your teleop and autonomous OpModes
@@ -65,7 +62,7 @@ import org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware;
  *  In OnBot Java, add a new OpMode, drawing from this Sample; select TeleOp.
  *  Also add another new file named RobotHardware.java, drawing from the Sample with that name; select Not an OpMode.
  */
-@TeleOp(name="Strafe", group="Robot")
+@TeleOp(name="Drive", group="Robot")
 public class Strafe extends LinearOpMode {
     private ElapsedTime     runtime = new ElapsedTime();
     private boolean sean = false;
@@ -105,85 +102,10 @@ public class Strafe extends LinearOpMode {
             double strafe = gamepad1.left_stick_y;
             double twist = 0;
             double normalTurn= gamepad1.right_stick_x;
-            double cameraServo = gamepad2.left_trigger;
-            double slide = -gamepad2.left_stick_y;
-            double pickup = gamepad2.right_trigger;
-            double pickupClose = gamepad2.left_trigger;
-            boolean topHeight = false;
-            boolean midHeight = false;
-            boolean lowHeight = false;
-
-
-            double cameraPower;
-            double pickupPower;
-
             double leftPower;
             double rightPower;
             double leftForwardPower;
             double rightForwardPower;
-            double slidePower;
-
-
-
-//            if(gamepad2.left_trigger > 0) {
-//                cameraPower = cameraServo;
-//            }
-//
-//            robot.cameraServo.setPosition(0.0);
-
-            if(gamepad2.left_bumper) {
-                robot.pickup.setPosition(0);
-            }
-            if(gamepad2.right_bumper) {
-                robot.pickup.setPosition(.22);
-            }
-
-            if(gamepad2.b){
-                topHeight = true;
-            }
-            if(gamepad2.y){
-                midHeight = true;
-            }
-            if(gamepad2.x){
-                lowHeight = true;
-            }
-
-
-
-
-
-
-
-//            int arrayThing = 0;
-//
-//
-//
-//            if(gamepad2.x){
-//                arrayThing = 0;
-//            }
-//            if(gamepad2.a){
-//                arrayThing = 1;
-//            }
-//            if(gamepad2.b){
-//                arrayThing = 2;
-//            }
-//            if(gamepad2.y) {
-//                arrayThing = 3;
-//            }
-//
-//
-//            if(!robot.slide.isBusy()) {
-//                robot.slide.setTargetPosition(heights[arrayThing]);
-//                robot.slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                robot.slide.setPower(1);
-//            }
-//            if(robot.slide.isBusy()) {
-//                robot.slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//                robot.slide.setPower(0);
-//                robot.slide.setTargetPosition(arrayThing);
-//            }
-//
-//
 
             /*
              * If we had a gyro and wanted to do field-oriented control, here
@@ -232,9 +154,18 @@ public class Strafe extends LinearOpMode {
                 for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
             }
 
+            // Turn on and off sean mode
+            if(gamepad1.dpad_down)
+            {
+                sean = true;
+            }
+            if(gamepad1.dpad_up)
+            {
+                sean = false;
+            }
 
-            // apply the calculated values to the motors.
-            if(normalTurn == 0) {
+            // If driving with strafing and sean mode is not on
+            if(normalTurn == 0 && !sean) {
                 telemetry.addData(">", "Strafe");
                 telemetry.update();
                 robot.leftForwardDrive.setPower(speeds[0]);
@@ -242,7 +173,7 @@ public class Strafe extends LinearOpMode {
                 robot.leftDrive.setPower(speeds[2]);
                 robot.rightDrive.setPower(speeds[3]);
             }
-            else {
+            else if(!sean){ // If turning without sean mode
                 telemetry.addData(">","turn");
                 telemetry.update();
                 leftPower = Range.clip(normalTurn, -1.0, 1.0);
@@ -255,52 +186,22 @@ public class Strafe extends LinearOpMode {
                 robot.rightForwardDrive.setPower(-rightForwardPower);
                 robot.leftDrive.setPower(leftPower);
                 robot.rightDrive.setPower(rightPower);
-            }
-
-
-            if(gamepad1.dpad_down)
-            {
-                sean = true;
-            }
-            if(gamepad1.dpad_up)
-            {
-                sean = false;
-            }
-            if(gamepad1.dpad_right) {
-                robot.leftDrive.setPower(-.7);
-                robot.rightDrive.setPower(.7);
-                robot.leftForwardDrive.setPower(.7);
-                robot.rightForwardDrive.setPower(-.7);
-            }
-            if(gamepad1.dpad_left) {
-                robot.leftDrive.setPower(.7);
-                robot.rightDrive.setPower(-.7);
-                robot.leftForwardDrive.setPower(-.7);
-                robot.rightForwardDrive.setPower(.7);
-            }
-
-            if(sean) {
+            } else { // If sean mode is on
+                // Cut power 20%
+                telemetry.addData(">", "Sean Mode: On");
+                telemetry.update();
                 robot.leftDrive.setPower(robot.leftDrive.getPower() * 0.2);
                 robot.rightDrive.setPower(robot.rightDrive.getPower() * 0.2);
                 robot.leftForwardDrive.setPower(robot.leftForwardDrive.getPower() * 0.2);
                 robot.rightForwardDrive.setPower(robot.rightForwardDrive.getPower() * 0.2);
-                if(gamepad1.right_stick_x > 0) {
-                    leftPower = Range.clip(drive + twist, -0.5, 0.5) ;
-                    rightPower = Range.clip(drive - twist, -0.5, 0.5) ;
-                    rightForwardPower = Range.clip(drive - twist, -0.5, 0.5) ;
-                    leftForwardPower = Range.clip(drive + twist, -0.5, 0.5) ;
-
-
+                if (gamepad1.right_stick_x > 0) {
+                    // Turn at 50%
+                    robot.leftDrive.setPower(Range.clip(normalTurn, -.5, .5));
+                    robot.rightDrive.setPower(Range.clip(normalTurn, -.5, .5));
+                    robot.leftForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
+                    robot.rightForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
                 }
             }
-            slidePower = Range.clip(slide, -.88,.88);
-            robot.slide.setPower(slidePower);
-
         }
-
     }
-
-
-
-
 }
