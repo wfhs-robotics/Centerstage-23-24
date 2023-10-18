@@ -50,14 +50,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
-import org.openftc.apriltag.AprilTagDetection;;
+;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Autonomous(name = "Normal", group = "Pushbot")
 public class Auto extends LinearOpMode {
@@ -146,6 +148,27 @@ public class Auto extends LinearOpMode {
 
 
 
+        robot.cameraServo.setPosition(-.2);
+        ArrayList<AprilTagDetection> detections = myAprilTagProcessor.getDetections();
+        if(!detections.isEmpty()) { // If it sees an April Tag
+            for (AprilTagDetection detection : detections) {
+                if (detection.id <= 6) { // Alliance
+                    if(detection.id <= 3) { // Blue
+
+                    } else { // Red
+
+                    }
+                } else { // Audience
+                    if(detection.id <= 8) { // Red
+
+                    } else { // Blue
+
+                    }
+                }
+            }
+        } else { // If it fails to see an April Tag
+
+        }
     }
 
 

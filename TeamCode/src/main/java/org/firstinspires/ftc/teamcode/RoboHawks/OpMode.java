@@ -89,30 +89,15 @@ public class OpMode extends LinearOpMode {
             // Mecanum drive is controlled with three axes: drive (front-and-back),
             // strafe (left-and-right), and twist (rotating the whole chassis).
 
-            double arm = gamepad2.left_stick_y;
-            boolean clawOpen = gamepad2.left_bumper;
-            boolean clawClose = gamepad2.right_bumper;
-
             double drive = -gamepad1.left_stick_y;
             double strafe = gamepad1.left_stick_x;
             double twist = 0;
             double normalTurn= -gamepad1.right_stick_x;
-            double cameraServo = gamepad2.left_trigger;
-            double armServo = gamepad2.right_stick_y;
 
             double leftPower;
             double rightPower;
             double leftForwardPower;
             double rightForwardPower;
-
-
-
-            if(clawOpen) {
-                robot.claw.setPosition(.5);
-            }
-            if(clawClose) {
-                robot.claw.setPosition(-.5);
-            }
 
             //robot.cameraServo.setPosition(0.0);
             /*
@@ -212,13 +197,6 @@ public class OpMode extends LinearOpMode {
                 }
 
             }
-
-            robot.arm.setPower(Range.clip(arm, -1, 1));
-
-
-            robot.slide.setPower(Range.clip(armServo, -1, 1));
-
-
         }
 
     }
