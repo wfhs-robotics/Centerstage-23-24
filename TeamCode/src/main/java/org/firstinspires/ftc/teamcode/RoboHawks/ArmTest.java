@@ -31,9 +31,9 @@ package org.firstinspires.ftc.teamcode.RoboHawks;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -69,11 +69,14 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 
-@TeleOp(name="RHOpMode", group="Robot")
-public class OpMode extends LinearOpMode {
+@TeleOp(name="ArmTest", group="Robot")
+public class ArmTest extends LinearOpMode {
     private boolean sean = false;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
+    Hardware robot = new Hardware();
+    DcMotor armTop;
+    DcMotor armBottom;
+    HardwareMap hwMap;
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
@@ -83,88 +86,23 @@ public class OpMode extends LinearOpMode {
     public void runOpMode() {
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
+        armBottom = hardwareMap.get(DcMotor.class, "armBottom");
+        armTop = hardwareMap.get(DcMotor.class, "armTop");
+        double armTopPower = 0;
+        double armBottomPower = 0;
+
+        int currentPosition = armBottom.getCurrentPosition();
+        int previousPosition = currentPosition;
+        double time = getRuntime();
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            robot.init(hardwareMap);
-            // Drive code off of GM-zero
-            // Mecanum drive is controlled with three axes: drive (front-and-back),
-            // strafe (left-and-right), and twist (rotating the whole chassis).
-
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad1.left_stick_x * 1.0; // Counteract imperfect strafing
-            double rx = gamepad1.right_stick_x;
-            double normalTurn =  gamepad1.right_stick_x;
-
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio,
-            // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double leftFrontPower = (y + x + rx) / denominator;
-            double leftBackPower = (y - x + rx) / denominator;
-            double rightFrontPower = (y - x - rx) / denominator;
-            double rightBackPower = (y + x - rx) / denominator;
-
-            if (gamepad1.dpad_down) {
-                sean = true;
-            }
-            if (gamepad1.dpad_up) {
-                sean = false;
-            }
-
-            if (normalTurn == 0 && !sean) {
-                telemetry.addData(">", "Strafe");
-                telemetry.update();
-                TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Strafe", true);
-                dashboard.sendTelemetryPacket(packet);
-                robot.leftForwardDrive.setPower(leftFrontPower);
-                robot.leftDrive.setPower(leftBackPower);
-                robot.rightForwardDrive.setPower(rightFrontPower);
-                robot.rightDrive.setPower(rightBackPower);
-            } else if (!sean) { // If turning without sean mode
-                telemetry.addData(">", "turn");
-                telemetry.update();
-                TelemetryPacket packet = new TelemetryPacket();
-                packet.put("rightStickX", rx);
-                packet.put("normalTurn", normalTurn);
-                packet.put("Strafe", false);
-                dashboard.sendTelemetryPacket(packet);
-                leftBackPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightBackPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightFrontPower = Range.clip(normalTurn, -1.0, 1.0);
-                leftFrontPower = Range.clip(normalTurn, -1.0, 1.0);
-
-
-                robot.leftForwardDrive.setPower(-leftFrontPower);
-                robot.rightForwardDrive.setPower(-rightFrontPower);
-                robot.leftDrive.setPower(leftBackPower);
-                robot.rightDrive.setPower(rightBackPower);
-            } else { // If sean mode is on
-                // Cut power 20%
-                telemetry.addData(">", "Sean Mode: On");
-                telemetry.update();
-                robot.leftDrive.setPower(robot.leftDrive.getPower() * 0.2);
-                robot.rightDrive.setPower(robot.rightDrive.getPower() * 0.2);
-                robot.leftForwardDrive.setPower(robot.leftForwardDrive.getPower() * 0.2);
-                robot.rightForwardDrive.setPower(robot.rightForwardDrive.getPower() * 0.2);
-                if (gamepad1.right_stick_x > 0) {
-                    // Turn at 50%
-                    robot.leftDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.rightDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.leftForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.rightForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                }
-            }
-            ;
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("leftFrontPower", leftFrontPower);
-            packet.put("leftBackPower", leftBackPower);
-            packet.put("rightFrontPower", rightFrontPower);
-            packet.put("rightBackPower", rightBackPower);
-            dashboard.sendTelemetryPacket(packet);
+            currentPosition = armBottom.getCurrentPosition();
+            int positionChange = currentPosition - previousPosition;
+            double newTime = getRuntime() - time;
+            double velocity = positionChange / newTime;
+            armBottom.setPower(0.374 * 9.8 * velocity);
         }
     }
 }

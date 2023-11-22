@@ -152,13 +152,14 @@ public class Auto extends LinearOpMode {
         ArrayList<AprilTagDetection> detections = myAprilTagProcessor.getDetections();
         if(!detections.isEmpty()) { // If it sees an April Tag
             for (AprilTagDetection detection : detections) {
-                if (detection.id <= 6) { // Alliance
+                if (detection.id <= 6) { /** Alliance */
                     if(detection.id <= 3) { // Blue
 
                     } else { // Red
 
                     }
-                } else { // Audience
+
+                } else { /** Audience */
                     if(detection.id <= 8) { // Red
 
                     } else { // Blue

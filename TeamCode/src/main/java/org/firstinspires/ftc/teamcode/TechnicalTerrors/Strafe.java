@@ -28,10 +28,15 @@
  */
 
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+
 
 /**
  * This OpMode Sample illustrates how to use an external "hardware" class to modularize all the robot's sensors and actuators.
@@ -62,12 +67,13 @@ import com.qualcomm.robotcore.util.Range;
  *  In OnBot Java, add a new OpMode, drawing from this Sample; select TeleOp.
  *  Also add another new file named RobotHardware.java, drawing from the Sample with that name; select Not an OpMode.
  */
-@TeleOp(name="Drive", group="Robot")
-public class Strafe extends LinearOpMode {
-    private ElapsedTime     runtime = new ElapsedTime();
-    private boolean sean = false;
-    Hardware robot = new Hardware();
 
+
+@TeleOp(name="Strafe", group="Robot")
+public class Strafe extends LinearOpMode {
+    private boolean sean = false;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
@@ -75,18 +81,6 @@ public class Strafe extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        robot.init(hardwareMap);
-
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-
-
-
-        // initialize all the hardware, using the hardware class. See how clean and simple this is?
-
-
-
-
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -94,98 +88,60 @@ public class Strafe extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-
-
+            robot.init(hardwareMap);
+            // Drive code off of GM-zero
             // Mecanum drive is controlled with three axes: drive (front-and-back),
             // strafe (left-and-right), and twist (rotating the whole chassis).
-            double drive = -gamepad1.left_stick_x;
-            double strafe = gamepad1.left_stick_y;
-            double twist = 0;
-            double normalTurn= gamepad1.right_stick_x;
-            double leftPower;
-            double rightPower;
-            double leftForwardPower;
-            double rightForwardPower;
 
-            /*
-             * If we had a gyro and wanted to do field-oriented control, here
-             * is where we would implement it.
-             *
-             * The idea is fairly simple; we have a robot-oriented Cartesian (x,y)
-             * coordinate (strafe, drive), and we just rotate it by the gyro
-             * reading minus the offset that we read in the init() method.
-             * Some rough pseudocode demonstrating:
-             *
-             * if Field Oriented Control:
-             *     get gyro heading
-             *     subtract initial offset from heading
-             *     convert heading to radians (if necessary)
-             *     new strafe = strafe * cos(heading) - drive * sin(heading)
-             *     new drive  = strafe * sin(heading) + drive * cos(heading)
-             *
-             * If you want more understanding on where these rotation formulas come
-             * from, refer to
-             * https://en.wikipedia.org/wiki/Rotation_(mathematics)#Two_dimensions
-             */
+            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+            double x = gamepad1.left_stick_x * 1.0; // Counteract imperfect strafing
+            double rx = gamepad1.right_stick_x;
+            double normalTurn =  gamepad1.right_stick_x;
 
-            // You may need to multiply some of these by -1 to invert direction of
-            // the motor.  This is not an issue with the calculations themselves.
-            double[] speeds = {
-                    (drive + strafe + twist),
-                    (drive - strafe - twist),
-                    (drive - strafe + twist),
-                    (drive + strafe - twist)
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio,
+            // but only if at least one is out of the range [-1, 1]
+            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            double leftFrontPower = (y + x + rx) / denominator;
+            double leftBackPower = (y - x + rx) / denominator;
+            double rightFrontPower = (y - x - rx) / denominator;
+            double rightBackPower = (y + x - rx) / denominator;
 
-            };
-
-            // Because we are adding vectors and motors only take values between
-            // [-1,1] we may need to normalize them.
-
-            // Loop through all values in the speeds[] array and find the greatest
-            // *magnitude*.  Not the greatest velocity.
-            double max = Math.abs(speeds[0]);
-            for (int i = 0; i < speeds.length; i++) {
-                if (max < Math.abs(speeds[i])) max = Math.abs(speeds[i]);
-            }
-
-            // If and only if the maximum is outside of the range we want it to be,
-            // normalize all the other speeds based on the given speed value.
-            if (max > 1) {
-                for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
-            }
-
-            // Turn on and off sean mode
-            if(gamepad1.dpad_down)
-            {
+            if (gamepad1.dpad_down) {
                 sean = true;
             }
-            if(gamepad1.dpad_up)
-            {
+            if (gamepad1.dpad_up) {
                 sean = false;
             }
 
-            // If driving with strafing and sean mode is not on
-            if(normalTurn == 0 && !sean) {
+            if (normalTurn == 0 && !sean) {
                 telemetry.addData(">", "Strafe");
                 telemetry.update();
-                robot.leftForwardDrive.setPower(speeds[0]);
-                robot.rightForwardDrive.setPower(speeds[1]);
-                robot.leftDrive.setPower(speeds[2]);
-                robot.rightDrive.setPower(speeds[3]);
-            }
-            else if(!sean){ // If turning without sean mode
-                telemetry.addData(">","turn");
+                TelemetryPacket packet = new TelemetryPacket();
+                packet.put("Strafe", true);
+                dashboard.sendTelemetryPacket(packet);
+                robot.leftForwardDrive.setPower(leftFrontPower);
+                robot.leftDrive.setPower(leftBackPower);
+                robot.rightForwardDrive.setPower(rightFrontPower);
+                robot.rightDrive.setPower(rightBackPower);
+            } else if (!sean) { // If turning without sean mode
+                telemetry.addData(">", "turn");
                 telemetry.update();
-                leftPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightForwardPower = Range.clip(normalTurn, -1.0, 1.0);
-                leftForwardPower = Range.clip(normalTurn, -1.0, 1.0);
+                TelemetryPacket packet = new TelemetryPacket();
+                packet.put("rightStickX", rx);
+                packet.put("normalTurn", normalTurn);
+                packet.put("Strafe", false);
+                dashboard.sendTelemetryPacket(packet);
+                leftBackPower = Range.clip(normalTurn, -1.0, 1.0);
+                rightBackPower = Range.clip(normalTurn, -1.0, 1.0);
+                rightFrontPower = Range.clip(normalTurn, -1.0, 1.0);
+                leftFrontPower = Range.clip(normalTurn, -1.0, 1.0);
 
 
-                robot.leftForwardDrive.setPower(-leftForwardPower);
-                robot.rightForwardDrive.setPower(-rightForwardPower);
-                robot.leftDrive.setPower(leftPower);
-                robot.rightDrive.setPower(rightPower);
+                robot.leftForwardDrive.setPower(-leftFrontPower);
+                robot.rightForwardDrive.setPower(-rightFrontPower);
+                robot.leftDrive.setPower(leftBackPower);
+                robot.rightDrive.setPower(rightBackPower);
             } else { // If sean mode is on
                 // Cut power 20%
                 telemetry.addData(">", "Sean Mode: On");
@@ -202,6 +158,13 @@ public class Strafe extends LinearOpMode {
                     robot.rightForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
                 }
             }
+            ;
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("leftFrontPower", leftFrontPower);
+            packet.put("leftBackPower", leftBackPower);
+            packet.put("rightFrontPower", rightFrontPower);
+            packet.put("rightBackPower", rightBackPower);
+            dashboard.sendTelemetryPacket(packet);
         }
     }
 }
