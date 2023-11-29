@@ -96,6 +96,7 @@ public class Hardware
         arm1 = hwMap.get(Servo.class, "arm1");
         arm2 = hwMap.get(Servo.class, "arm2");
         wrist = hwMap.get(Servo.class, "wrist");
+        claw = hwMap.get(Servo.class, "claw");
         webcam = hwMap.get(WebcamName.class, "Webcam 1");
 
 
