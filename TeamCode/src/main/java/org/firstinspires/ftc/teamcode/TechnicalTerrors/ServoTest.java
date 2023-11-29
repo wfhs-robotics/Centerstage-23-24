@@ -101,7 +101,7 @@ public class ServoTest extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             arm1.setPosition(ServoTestConstants.arm1Pos);
-            arm2.setPosition(ServoTestConstants.arm2Pos);
+            arm2.setPosition(ServoTestConstants.arm2Pos - ServoTestConstants.arm1Pos);
             wrist.setPosition(ServoTestConstants.wristPos);
             claw.setPosition(ServoTestConstants.clawPos);
         }
