@@ -30,11 +30,7 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -65,8 +61,12 @@ public class Hardware
     public DcMotor  leftForwardDrive    = null;
     public DcMotor  rightForwardDrive    = null;
     public Servo cameraServo = null;
-    public DcMotor slide = null;
-    public Servo pickup = null;
+    public DcMotor slide1 = null;
+    public DcMotor slide2 = null;
+    public Servo claw = null;
+    public Servo arm1 = null;
+    public Servo arm2 = null;
+    public Servo wrist = null;
     public WebcamName webcam = null;
     public BNO055IMU imu = null;
 
@@ -91,8 +91,11 @@ public class Hardware
         leftForwardDrive    = hwMap.get(DcMotor.class, "leftForwardDrive");
         rightForwardDrive = hwMap.get(DcMotor.class, "rightForwardDrive");
         cameraServo = hwMap.get(Servo.class, "cameraServo");
-        slide = hwMap.get(DcMotor.class, "slide");
-        pickup = hwMap.get(Servo.class, "pickup");
+        slide1 = hwMap.get(DcMotor.class, "slide1");
+        slide2 = hwMap.get(DcMotor.class, "slide2");
+        arm1 = hwMap.get(Servo.class, "arm1");
+        arm2 = hwMap.get(Servo.class, "arm2");
+        wrist = hwMap.get(Servo.class, "wrist");
         webcam = hwMap.get(WebcamName.class, "Webcam 1");
 
 
@@ -110,9 +113,9 @@ public class Hardware
         rightDrive.setPower(0);
         leftForwardDrive.setPower(0);
         rightForwardDrive.setPower(0);
-        slide.setPower(0);
+        slide1.setPower(0);
         cameraServo.setPosition(.5); //technical is .55
-        pickup.setPosition(.22);
+
 
 
 
@@ -123,7 +126,7 @@ public class Hardware
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
 
