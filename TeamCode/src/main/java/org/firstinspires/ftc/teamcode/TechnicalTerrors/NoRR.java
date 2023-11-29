@@ -69,11 +69,11 @@ import org.firstinspires.ftc.teamcode.RoboHawks.Hardware;
  */
 
 
-@TeleOp(name="RHOpMode", group="Robot")
+@TeleOp(name="NoRRTest", group="Robot")
 public class NoRR extends LinearOpMode {
     private boolean sean = false;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new Hardware();
+    org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware();
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.

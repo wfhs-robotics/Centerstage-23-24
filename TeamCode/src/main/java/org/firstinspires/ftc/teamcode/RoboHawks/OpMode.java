@@ -87,83 +87,76 @@ public class OpMode extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            double drive = -gamepad1.left_stick_x;
+            double strafe = gamepad1.left_stick_y;
+            double twist = 0;
+            double normalTurn= gamepad1.right_stick_x;
+
+            double leftPower = Double.parseDouble(null);
+            double leftForwardPower = Double.parseDouble(null);
+            double rightPower = Double.parseDouble(null);
+            double rightForwardPower = Double.parseDouble(null);
 
             robot.init(hardwareMap);
             // Drive code off of GM-zero
             // Mecanum drive is controlled with three axes: drive (front-and-back),
             // strafe (left-and-right), and twist (rotating the whole chassis).
 
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad1.left_stick_x * 1.0; // Counteract imperfect strafing
-            double rx = gamepad1.right_stick_x;
-            double normalTurn =  gamepad1.right_stick_x;
+            double[] speeds = {
+                    (drive + strafe + twist),
+                    (drive - strafe - twist),
+                    (drive - strafe + twist),
+                    (drive + strafe - twist)
 
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio,
-            // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double leftFrontPower = (y + x + rx) / denominator;
-            double leftBackPower = (y - x + rx) / denominator;
-            double rightFrontPower = (y - x - rx) / denominator;
-            double rightBackPower = (y + x - rx) / denominator;
+            };
 
-            if (gamepad1.dpad_down) {
-                sean = true;
-            }
-            if (gamepad1.dpad_up) {
-                sean = false;
+            // Because we are adding vectors and motors only take values between
+            // [-1,1] we may need to normalize them.
+
+            // Loop through all values in the speeds[] array and find the greatest
+            // *magnitude*.  Not the greatest velocity.
+            double max = Math.abs(speeds[0]);
+            for (int i = 0; i < speeds.length; i++) {
+                if (max < Math.abs(speeds[i])) max = Math.abs(speeds[i]);
             }
 
-            if (normalTurn == 0 && !sean) {
+            // If and only if the maximum is outside of the range we want it to be,
+            // normalize all the other speeds based on the given speed value.
+            if (max > 1) {
+                for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
+            }
+
+
+            // apply the calculated values to the motors.
+            if(normalTurn == 0) {
                 telemetry.addData(">", "Strafe");
                 telemetry.update();
-                TelemetryPacket packet = new TelemetryPacket();
-                packet.put("Strafe", true);
-                dashboard.sendTelemetryPacket(packet);
-                robot.leftForwardDrive.setPower(leftFrontPower);
-                robot.leftDrive.setPower(leftBackPower);
-                robot.rightForwardDrive.setPower(rightFrontPower);
-                robot.rightDrive.setPower(rightBackPower);
-            } else if (!sean) { // If turning without sean mode
-                telemetry.addData(">", "turn");
-                telemetry.update();
-                TelemetryPacket packet = new TelemetryPacket();
-                packet.put("rightStickX", rx);
-                packet.put("normalTurn", normalTurn);
-                packet.put("Strafe", false);
-                dashboard.sendTelemetryPacket(packet);
-                leftBackPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightBackPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightFrontPower = Range.clip(normalTurn, -1.0, 1.0);
-                leftFrontPower = Range.clip(normalTurn, -1.0, 1.0);
-
-
-                robot.leftForwardDrive.setPower(-leftFrontPower);
-                robot.rightForwardDrive.setPower(-rightFrontPower);
-                robot.leftDrive.setPower(leftBackPower);
-                robot.rightDrive.setPower(rightBackPower);
-            } else { // If sean mode is on
-                // Cut power 20%
-                telemetry.addData(">", "Sean Mode: On");
-                telemetry.update();
-                robot.leftDrive.setPower(robot.leftDrive.getPower() * 0.2);
-                robot.rightDrive.setPower(robot.rightDrive.getPower() * 0.2);
-                robot.leftForwardDrive.setPower(robot.leftForwardDrive.getPower() * 0.2);
-                robot.rightForwardDrive.setPower(robot.rightForwardDrive.getPower() * 0.2);
-                if (gamepad1.right_stick_x > 0) {
-                    // Turn at 50%
-                    robot.leftDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.rightDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.leftForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                    robot.rightForwardDrive.setPower(Range.clip(normalTurn, -.5, .5));
-                }
+                robot.leftForwardDrive.setPower(speeds[0]);
+                robot.rightForwardDrive.setPower(speeds[1]);
+                robot.leftDrive.setPower(speeds[2]);
+                robot.rightDrive.setPower(speeds[3]);
             }
+            else {
+                telemetry.addData(">","turn");
+                telemetry.update();
+                leftPower = Range.clip(normalTurn, -1.0, 1.0);
+                rightPower = Range.clip(normalTurn, -1.0, 1.0);
+                rightForwardPower = Range.clip(normalTurn, -1.0, 1.0);
+                leftForwardPower = Range.clip(normalTurn, -1.0, 1.0);
+
+
+                robot.leftForwardDrive.setPower(-leftForwardPower);
+                robot.rightForwardDrive.setPower(-rightForwardPower);
+                robot.leftDrive.setPower(leftPower);
+                robot.rightDrive.setPower(rightPower);
+            }
+
             ;
             TelemetryPacket packet = new TelemetryPacket();
-            packet.put("leftFrontPower", leftFrontPower);
-            packet.put("leftBackPower", leftBackPower);
-            packet.put("rightFrontPower", rightFrontPower);
-            packet.put("rightBackPower", rightBackPower);
+            packet.put("leftFrontPower", leftForwardPower);
+            packet.put("leftBackPower", leftPower);
+            packet.put("rightFrontPower", rightForwardPower);
+            packet.put("rightBackPower", rightPower);
             dashboard.sendTelemetryPacket(packet);
         }
     }
