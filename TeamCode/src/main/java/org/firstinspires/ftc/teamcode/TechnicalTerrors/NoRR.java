@@ -73,7 +73,7 @@ import org.firstinspires.ftc.teamcode.RoboHawks.Hardware;
 public class NoRR extends LinearOpMode {
     private boolean sean = false;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new Hardware();
+    org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new Hardware();
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
@@ -113,6 +113,44 @@ public class NoRR extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 sean = false;
             }
+
+            if(gamepad2.dpad_down){
+                robot.arm1.setPosition(0);
+                robot.arm2.setPosition(0);
+            }
+
+            if(gamepad2.dpad_up){
+                robot.arm1.setPosition(.1);
+                robot.arm2.setPosition(.1);
+            }
+
+            if (gamepad2.left_bumper){
+                robot.arm1.setPosition(.2);
+                robot.arm2.setPosition(.2);
+            }
+
+            if (gamepad2.dpad_right){
+                robot.arm1.setPosition(1);
+                robot.arm2.setPosition(1);
+            }
+
+            if (gamepad2.left_trigger > 0){
+                robot.arm1.setPosition(.4);
+                robot.arm2.setPosition(.4);
+            }
+
+            if (gamepad2.right_bumper){
+                robot.claw.setPosition(.3);
+            }
+
+            if (gamepad2.right_trigger > 0){
+                robot.claw.setPosition(0);
+            }
+
+            if (gamepad2.a){
+                robot.claw.setPosition(1);
+            }
+
 
             if (normalTurn == 0 && !sean) {
                 telemetry.addData(">", "Strafe");
