@@ -30,9 +30,6 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XZY;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
 import android.util.Size;
 
@@ -42,24 +39,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 ;
-import org.openftc.easyopencv.OpenCvCameraFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Autonomous(name = "Normal", group = "Pushbot")
 public class Auto extends LinearOpMode {
@@ -415,17 +406,17 @@ public class Auto extends LinearOpMode {
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            spoolTarget = robot.slide.getCurrentPosition() + (int) (slideInches * COUNTS_PER_INCH_SPOOL);
-            robot.slide.setTargetPosition(spoolTarget);
+            spoolTarget = robot.slide1.getCurrentPosition() + (int) (slideInches * COUNTS_PER_INCH_SPOOL);
+            robot.slide1.setTargetPosition(spoolTarget);
 
 
             // Turn On RUN_TO_POSITION
-            robot.slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.slide1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
             // reset the timeout time and start motion.
             runtime.reset();
-            robot.slide.setPower(Math.abs(speed));
+            robot.slide1.setPower(Math.abs(speed));
 
 
             // keep looping while we are still active, and there is time left, and both motors are running.
@@ -436,7 +427,7 @@ public class Auto extends LinearOpMode {
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while (opModeIsActive() &&
                     (runtime.seconds() < timeoutS) &&
-                    (robot.slide.isBusy())) {
+                    (robot.slide1.isBusy())) {
 
                 // Display it for the driver.
             /*    telemetry.addData("Path1",  "Running to %7d :%7d", spoolTarget);
@@ -446,11 +437,11 @@ public class Auto extends LinearOpMode {
             }
 
             // Stop all motion;
-            robot.slide.setPower(0);
-            robot.slide.setPower(0);
+            robot.slide1.setPower(0);
+            robot.slide1.setPower(0);
 
             // Turn off RUN_TO_POSITION
-            robot.slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.slide1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
             sleep(250);   // optional pause after each move
