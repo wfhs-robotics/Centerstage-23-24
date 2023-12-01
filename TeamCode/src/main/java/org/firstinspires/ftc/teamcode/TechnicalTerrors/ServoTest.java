@@ -89,8 +89,8 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() {
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
-        arm1 = hardwareMap.get(Servo.class, "arm1");
-        arm2 = hardwareMap.get(Servo.class, "arm2");
+        arm1 = hardwareMap.get(Servo.class, "slide1");
+        arm2 = hardwareMap.get(Servo.class, "slide2");
         claw = hardwareMap.get(Servo.class, "claw");
         wrist = hardwareMap.get(Servo.class, "wrist");
 

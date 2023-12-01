@@ -60,9 +60,9 @@ public class Hardware
     public DcMotor  leftForwardDrive    = null;
     public DcMotor  rightForwardDrive    = null;
     public Servo cameraServo = null;
-    public DcMotor arm = null;
     public Servo claw = null;
-    public CRServo slide = null;
+    public Servo wrist = null;
+    public DcMotor arm = null;
 
 
 
@@ -85,6 +85,9 @@ public class Hardware
         rightDrive = hwMap.get(DcMotor.class, "rightDrive");
         leftForwardDrive    = hwMap.get(DcMotor.class, "leftForwardDrive");
         rightForwardDrive = hwMap.get(DcMotor.class, "rightForwardDrive");
+        claw = hwMap.get(Servo.class, "claw");
+        wrist = hwMap.get(Servo.class, "wrist");
+        arm = hwMap.get(DcMotor.class, "arm");
 
 
 
@@ -112,10 +115,6 @@ public class Hardware
         rightForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 //        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightDrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightForwardDrive.setDirection(DcMotorSimple.Direction.FORWARD);
 
 
         // Define and initialize ALL installed servos.

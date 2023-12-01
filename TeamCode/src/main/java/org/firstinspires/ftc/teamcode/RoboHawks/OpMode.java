@@ -30,10 +30,15 @@
 package org.firstinspires.ftc.teamcode.RoboHawks;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.control.PIDFController;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -68,10 +73,19 @@ import com.qualcomm.robotcore.util.Range;
  *  Also add another new file named RobotHardware.java, drawing from the Sample with that name; select Not an OpMode.
  */
 
-
+@Config
 @TeleOp(name="RHOpMode", group="Robot")
 public class OpMode extends LinearOpMode {
     private boolean sean = false;
+    private PIDController controller;
+
+    public static double p = 0.004, i = 0, d = 0.0001;
+    public static double f = 0.1;
+    public static double aPos = 0;
+    public static double yPos = .65;
+    public static double clawOpen = 1;
+    public static double clawClose = -1;
+    private final double ticksInDegrees = 1425.1 / 360.0  ;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
 
@@ -81,83 +95,77 @@ public class OpMode extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        controller = new PIDController(p, i, d);
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            double drive = -gamepad1.left_stick_x;
-            double strafe = gamepad1.left_stick_y;
-            double twist = 0;
-            double normalTurn= gamepad1.right_stick_x;
-
-            double leftPower = Double.parseDouble(null);
-            double leftForwardPower = Double.parseDouble(null);
-            double rightPower = Double.parseDouble(null);
-            double rightForwardPower = Double.parseDouble(null);
-
             robot.init(hardwareMap);
             // Drive code off of GM-zero
             // Mecanum drive is controlled with three axes: drive (front-and-back),
             // strafe (left-and-right), and twist (rotating the whole chassis).
 
-            double[] speeds = {
-                    (drive + strafe + twist),
-                    (drive - strafe - twist),
-                    (drive - strafe + twist),
-                    (drive + strafe - twist)
+            robot.leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+            robot.leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
-            };
+            waitForStart();
 
-            // Because we are adding vectors and motors only take values between
-            // [-1,1] we may need to normalize them.
+            if (isStopRequested()) return;
 
-            // Loop through all values in the speeds[] array and find the greatest
-            // *magnitude*.  Not the greatest velocity.
-            double max = Math.abs(speeds[0]);
-            for (int i = 0; i < speeds.length; i++) {
-                if (max < Math.abs(speeds[i])) max = Math.abs(speeds[i]);
+            while (opModeIsActive()) {
+                controller.setPID(p,i,d);
+                double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+                double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+                double rx = gamepad1.right_stick_x;
+                double armPower = -gamepad2.left_stick_y;
+
+                // Arm Code is from: <insert link>
+                // Drive Code is from: <insert link>
+                int armPos;
+                double pid;
+                double ff;
+                double power;
+
+                if(armPower != 0) {
+                    telemetry.addData(">", "Moving Arm");
+                    telemetry.update();
+                    robot.arm.setPower(armPower);
+                }
+
+                if(armPower == 0) {
+                     telemetry.addData(">", "Holding Arm");
+                     telemetry.update();
+                     armPos = -robot.arm.getCurrentPosition();
+                     pid = controller.calculate(armPos, -robot.arm.getCurrentPosition());
+                     ff = Math.cos(Math.toRadians(-robot.arm.getCurrentPosition() / ticksInDegrees)) * f;
+                     power = pid + ff;
+                     robot.arm.setPower(-power);
+                }
+                if(gamepad2.y)
+                    robot.wrist.setPosition(yPos);
+                if(gamepad2.a)
+                    robot.wrist.setPosition(aPos);
+                if(gamepad2.left_bumper)
+                    robot.claw.setPosition(clawOpen);
+                if(gamepad2.right_bumper)
+                    robot.claw.setPosition(clawClose);
+
+                // Denominator is the largest motor power (absolute value) or 1
+                // This ensures all the powers maintain the same ratio,
+                // but only if at least one is out of the range [-1, 1]
+                double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+                double frontLeftPower = (y + x + rx) / denominator;
+                double backLeftPower = (y - x + rx) / denominator;
+                double frontRightPower = (y - x - rx) / denominator;
+                double backRightPower = (y + x - rx) / denominator;
+
+                robot.leftForwardDrive.setPower(frontLeftPower);
+                robot.leftDrive.setPower(backLeftPower);
+                robot.rightForwardDrive.setPower(frontRightPower);
+                robot.rightDrive.setPower(backRightPower);
             }
-
-            // If and only if the maximum is outside of the range we want it to be,
-            // normalize all the other speeds based on the given speed value.
-            if (max > 1) {
-                for (int i = 0; i < speeds.length; i++) speeds[i] /= max;
-            }
-
-
-            // apply the calculated values to the motors.
-            if(normalTurn == 0) {
-                telemetry.addData(">", "Strafe");
-                telemetry.update();
-                robot.leftForwardDrive.setPower(speeds[0]);
-                robot.rightForwardDrive.setPower(speeds[1]);
-                robot.leftDrive.setPower(speeds[2]);
-                robot.rightDrive.setPower(speeds[3]);
-            }
-            else {
-                telemetry.addData(">","turn");
-                telemetry.update();
-                leftPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightPower = Range.clip(normalTurn, -1.0, 1.0);
-                rightForwardPower = Range.clip(normalTurn, -1.0, 1.0);
-                leftForwardPower = Range.clip(normalTurn, -1.0, 1.0);
-
-
-                robot.leftForwardDrive.setPower(-leftForwardPower);
-                robot.rightForwardDrive.setPower(-rightForwardPower);
-                robot.leftDrive.setPower(leftPower);
-                robot.rightDrive.setPower(rightPower);
-            }
-
-            ;
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("leftFrontPower", leftForwardPower);
-            packet.put("leftBackPower", leftPower);
-            packet.put("rightFrontPower", rightForwardPower);
-            packet.put("rightBackPower", rightPower);
-            dashboard.sendTelemetryPacket(packet);
         }
     }
 }

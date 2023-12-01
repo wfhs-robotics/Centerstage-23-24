@@ -114,42 +114,42 @@ public class NoRR extends LinearOpMode {
                 sean = false;
             }
 
-            if(gamepad2.dpad_down){
-                robot.arm1.setPosition(0);
-                robot.arm2.setPosition(0);
-            }
+//            if(gamepad2.dpad_down){
+//                robot.slide1.setPosition(0);
+//                robot.slide2.setPosition(0);
+//            }
+//
+//            if(gamepad2.dpad_up){
+//                robot.slide1.setPosition(.1);
+//                robot.slide.setPosition(.1);
+//            }
+//
+//            if (gamepad2.left_bumper){
+//                robot.slide1.setPosition(.2);
+//                robot.slide2.setPosition(.2);
+//            }
+//
+//            if (gamepad2.dpad_right){
+//                robot.slide1.setPosition(1);
+//                robot.arm2.setPosition(1);
+//            }
+//
+//            if (gamepad2.left_trigger > 0){
+//                robot.arm1.setPosition(.4);
+//                robot.arm2.setPosition(.4);
+//            }
 
-            if(gamepad2.dpad_up){
-                robot.arm1.setPosition(.1);
-                robot.arm2.setPosition(.1);
-            }
-
-            if (gamepad2.left_bumper){
-                robot.arm1.setPosition(.2);
-                robot.arm2.setPosition(.2);
-            }
-
-            if (gamepad2.dpad_right){
-                robot.arm1.setPosition(1);
-                robot.arm2.setPosition(1);
-            }
-
-            if (gamepad2.left_trigger > 0){
-                robot.arm1.setPosition(.4);
-                robot.arm2.setPosition(.4);
-            }
-
-            if (gamepad2.right_bumper){
-                robot.claw.setPosition(.3);
-            }
-
-            if (gamepad2.right_trigger > 0){
-                robot.claw.setPosition(0);
-            }
-
-            if (gamepad2.a){
-                robot.claw.setPosition(1);
-            }
+//            if (gamepad2.right_bumper){
+//                robot.claw.setPosition(.3);
+//            }
+//
+//            if (gamepad2.right_trigger > 0){
+//                robot.claw.setPosition(0);
+//            }
+//
+//            if (gamepad2.a){
+//                robot.claw.setPosition(1);
+//            }
 
 
             if (normalTurn == 0 && !sean) {

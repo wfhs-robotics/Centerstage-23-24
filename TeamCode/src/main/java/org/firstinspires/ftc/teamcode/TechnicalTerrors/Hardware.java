@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -61,11 +62,11 @@ public class Hardware
     public DcMotor  leftForwardDrive    = null;
     public DcMotor  rightForwardDrive    = null;
     public Servo cameraServo = null;
+    public Servo arm1 = null;
+    public Servo arm2 = null;
     public DcMotor slide1 = null;
     public DcMotor slide2 = null;
     public Servo claw = null;
-    public Servo arm1 = null;
-    public Servo arm2 = null;
     public Servo wrist = null;
     public WebcamName webcam = null;
     public BNO055IMU imu = null;
@@ -90,14 +91,14 @@ public class Hardware
         rightDrive = hwMap.get(DcMotor.class, "rightDrive");
         leftForwardDrive    = hwMap.get(DcMotor.class, "leftForwardDrive");
         rightForwardDrive = hwMap.get(DcMotor.class, "rightForwardDrive");
-        cameraServo = hwMap.get(Servo.class, "cameraServo");
-        slide1 = hwMap.get(DcMotor.class, "slide1");
-        slide2 = hwMap.get(DcMotor.class, "slide2");
+//        cameraServo = hwMap.get(Servo.class, "cameraServo");
         arm1 = hwMap.get(Servo.class, "arm1");
         arm2 = hwMap.get(Servo.class, "arm2");
         wrist = hwMap.get(Servo.class, "wrist");
         claw = hwMap.get(Servo.class, "claw");
-        webcam = hwMap.get(WebcamName.class, "Webcam 1");
+        slide1 = hwMap.get(DcMotor.class, "slide1");
+        slide2 = hwMap.get(DcMotor.class, "slide2");
+//        webcam = hwMap.get(WebcamName.class, "Webcam 1");
 
 
         BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
@@ -114,8 +115,8 @@ public class Hardware
         rightDrive.setPower(0);
         leftForwardDrive.setPower(0);
         rightForwardDrive.setPower(0);
-        slide1.setPower(0);
-        cameraServo.setPosition(.5); //technical is .55
+//        slide1.setPower(0);
+//        cameraServo.setPosition(.5); //technical is .55
 
 
 
@@ -127,7 +128,6 @@ public class Hardware
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        slide1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
 
