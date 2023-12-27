@@ -88,7 +88,7 @@ public class Strafe extends LinearOpMode {
     public static double yPos1 = 0;
     public static double yPos2 = .525;
     public static double wristOutside = .55;
-    public static double wristInside = 0.025;
+    public static double wristInside = 0.015;
     public static double clawClosed = .9;
     public static double clawOpen1 = .525;
     public static double clawOpen2 = .725;
@@ -201,7 +201,7 @@ public class Strafe extends LinearOpMode {
                 robot.claw.setPosition(clawClosed);
             }
             if (gamepad2.a) { // Move arm to the inside
-                robot.arm1.setPosition(1.0);
+                robot.arm1.setPosition(.98);
                 robot.arm2.setPosition(0);
                 robot.wrist.setPosition(wristInside);
             }

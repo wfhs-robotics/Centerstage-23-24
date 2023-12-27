@@ -103,25 +103,15 @@ public class Hardware
 //        webcam = hwMap.get(WebcamName.class, "Webcam 1");
 
 
-        BNO055IMU.Parameters parametersIMU = new BNO055IMU.Parameters();
-        imu = hwMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parametersIMU);
-
-
-
-
-        // Set to FORWARD if using AndyMark motors
-
         // Set all motors to zero power
         leftDrive.setPower(0);
         rightDrive.setPower(0);
         leftForwardDrive.setPower(0);
         rightForwardDrive.setPower(0);
-//        slide1.setPower(0);
-//        cameraServo.setPosition(.5); //technical is .55
 
-
-
+        wrist.setPosition(.015);
+        arm1.setPosition(.98);
+        arm2.setPosition(.02);
 
 
         // Set all motors to run without encoders.

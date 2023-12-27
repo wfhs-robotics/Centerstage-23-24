@@ -17,19 +17,28 @@ import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySe
 @Config
 @Autonomous(name = "RRTest", group = "Pushbot")
 public class AutoRRTest extends LinearOpMode {
-    public static double DISTANCE = 60; // in
+    public static double DISTANCE = 31.5; // in
+    public static double toBoard = 42;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Hardware robot =  new Hardware();
 
     @Override
     public void runOpMode() throws InterruptedException {
+        robot.init(hardwareMap);
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        Pose2d startPose = new Pose2d(14, -62, Math.toRadians(90));
+        drive.setPoseEstimate(startPose);
 
-        TrajectorySequence redAlliance = drive.trajectorySequenceBuilder(new Pose2d(14, -62, Math.toRadians(90)))
-                .forward(35)
-                .turn(Math.toRadians(-90))
-                .forward(35)
+
+        TrajectorySequence redAlliance = drive.trajectorySequenceBuilder(startPose)
+                .forward(DISTANCE)
+                .turn(Math.toRadians(90))
+                .back(toBoard)
                 .build();
+
+
 
         waitForStart();
 
