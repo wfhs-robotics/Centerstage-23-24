@@ -30,14 +30,9 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -89,8 +84,8 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() {
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
-        arm1 = hardwareMap.get(Servo.class, "slide1");
-        arm2 = hardwareMap.get(Servo.class, "slide2");
+        arm1 = hardwareMap.get(Servo.class, "arm1");
+        arm2 = hardwareMap.get(Servo.class, "arm2");
         claw = hardwareMap.get(Servo.class, "claw");
         wrist = hardwareMap.get(Servo.class, "wrist");
 
@@ -104,6 +99,7 @@ public class ServoTest extends LinearOpMode {
             arm2.setPosition(ServoTestConstants.arm2Pos - ServoTestConstants.arm1Pos);
             wrist.setPosition(ServoTestConstants.wristPos);
             claw.setPosition(ServoTestConstants.clawPos);
+
         }
     }
 }

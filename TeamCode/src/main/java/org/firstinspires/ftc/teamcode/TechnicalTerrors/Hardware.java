@@ -70,6 +70,7 @@ public class Hardware
     public Servo wrist = null;
     public WebcamName webcam = null;
     public BNO055IMU imu = null;
+    public CRServo plane = null;
 
 
     /* local OpMode members. */
@@ -98,6 +99,7 @@ public class Hardware
         claw = hwMap.get(Servo.class, "claw");
         slide1 = hwMap.get(DcMotor.class, "slide1");
         slide2 = hwMap.get(DcMotor.class, "slide2");
+        plane = hwMap.get(CRServo.class, "plane");
 //        webcam = hwMap.get(WebcamName.class, "Webcam 1");
 
 

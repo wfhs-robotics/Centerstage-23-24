@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.RoadRunner.drive.opmode;
 
+import static org.firstinspires.ftc.teamcode.RoadRunner.drive.StandardTrackingWheelLocalizer.frontEncoder;
+import static org.firstinspires.ftc.teamcode.RoadRunner.drive.StandardTrackingWheelLocalizer.leftEncoder;
+import static org.firstinspires.ftc.teamcode.RoadRunner.drive.StandardTrackingWheelLocalizer.rightEncoder;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,6 +20,7 @@ import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
  */
 @TeleOp(group = "drive")
 public class LocalizationTest extends LinearOpMode {
+    // Starting: 121
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -39,6 +44,9 @@ public class LocalizationTest extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+            telemetry.addData("encoder1", leftEncoder.getCurrentPosition());
+            telemetry.addData("encoder2",  rightEncoder.getCurrentPosition());
+            telemetry.addData("encoder3", frontEncoder.getCurrentPosition());
             telemetry.update();
         }
     }

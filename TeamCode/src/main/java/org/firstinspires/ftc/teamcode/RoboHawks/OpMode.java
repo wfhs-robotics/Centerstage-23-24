@@ -31,16 +31,10 @@ package org.firstinspires.ftc.teamcode.RoboHawks;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.control.PIDFController;
 import com.arcrobotics.ftclib.controller.PIDController;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
 
 
 /**
@@ -83,9 +77,10 @@ public class OpMode extends LinearOpMode {
     public static double f = 0.1;
     public static double aPos = 0;
     public static double yPos = .65;
-    public static double clawOpen = 1;
+    public static double clawOpen = .5;
     public static double clawClose = -1;
     private final double ticksInDegrees = 1425.1 / 360.0  ;
+    boolean plane = false;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
 
@@ -151,6 +146,19 @@ public class OpMode extends LinearOpMode {
                     robot.claw.setPosition(clawOpen);
                 if(gamepad2.right_bumper)
                     robot.claw.setPosition(clawClose);
+                if(gamepad2.x) {
+                    if(plane) {
+                        plane = false;
+                    } else {
+                        plane = true;
+                    }
+                }
+                if(plane) {
+                    robot.plane.setPower(.8);
+                }
+                if(!plane) {
+                    robot.plane.setPower(0);
+                }
 
                 // Denominator is the largest motor power (absolute value) or 1
                 // This ensures all the powers maintain the same ratio,

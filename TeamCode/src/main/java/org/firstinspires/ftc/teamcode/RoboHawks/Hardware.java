@@ -31,7 +31,6 @@ package org.firstinspires.ftc.teamcode.RoboHawks;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -63,6 +62,8 @@ public class Hardware
     public Servo claw = null;
     public Servo wrist = null;
     public DcMotor arm = null;
+    public CRServo plane = null;
+
 
 
 
@@ -88,6 +89,7 @@ public class Hardware
         claw = hwMap.get(Servo.class, "claw");
         wrist = hwMap.get(Servo.class, "wrist");
         arm = hwMap.get(DcMotor.class, "arm");
+        plane = hwMap.get(CRServo.class, "plane");
 
 
 

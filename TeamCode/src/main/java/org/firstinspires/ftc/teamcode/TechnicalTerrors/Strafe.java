@@ -31,8 +31,11 @@ package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 /**
@@ -68,10 +71,33 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @Config
 @TeleOp(name="Strafe", group="Robot")
 public class Strafe extends LinearOpMode {
+    private PIDController controller;
+    private PIDController controller2;
+    public static double p = 0.004, i = 0, d = 0.0001;
+    public static double f = 0.11;
+    public static double p2 = 0.004, i2 = 0, d2 = 0.0001;
+    public static double f2 = 0.11;
+
+    public static int target = 0;
+    public static int target2 = 0;
+    private final double ticks_in_degrees = 1425.1 / 360;
     private boolean sean = false;
-    public static double clawOpen = 1;
-    public static double clawClosed = 0;
-    public static double onePixel = .1;
+
+    public static double onePixel = .02;
+    public static double aPos = .65;
+    public static double yPos1 = 0;
+    public static double yPos2 = .525;
+    public static double wristOutside = .55;
+    public static double wristInside = 0.025;
+    public static double clawClosed = .9;
+    public static double clawOpen1 = .525;
+    public static double clawOpen2 = .725;
+    public int driveDirection = 1;
+
+    boolean prevDDown = false;
+    boolean prevDUp = false;
+    boolean plane = false;
+    String high = "null";
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware();
 
@@ -82,6 +108,18 @@ public class Strafe extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap);
+        controller = new PIDController(p, i, d);
+        controller2 = new PIDController(p2, i2, d2);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        robot.slide1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.slide2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.slide1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.slide2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.arm1.setPosition(1.0);
+        robot.arm2.setPosition(0);
+        target = 0;
 //        robot.leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 //        robot.leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         // Send telemetry message to signify robot waiting;
@@ -91,9 +129,22 @@ public class Strafe extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            controller.setPID(p, i, d);
+            int armPos = robot.slide1.getCurrentPosition();
+            double pid = controller.calculate(armPos, target);
+            double ff = Math.cos(Math.toRadians(target / ticks_in_degrees)) * f;
+            double power = pid + ff;
+
+            controller2.setPID(p2, i2, d2);
+            int armPos2 = robot.slide2.getCurrentPosition();
+            double pid2 = controller2.calculate(armPos2, -target);
+            double ff2 = Math.cos(Math.toRadians(-target / ticks_in_degrees)) * f2;
+            double power2 = pid2 + ff2;
+
+
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
             double x = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
-            double rx = gamepad1.right_stick_x;
+            double rx = -gamepad1.right_stick_x;
 
 
             // Drive code off of GM-zero
@@ -103,29 +154,93 @@ public class Strafe extends LinearOpMode {
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
 
-            robot.leftForwardDrive.setPower(frontLeftPower);
-            robot.leftDrive.setPower(backLeftPower);
-            robot.rightForwardDrive.setPower(frontRightPower);
-            robot.rightDrive.setPower(-backRightPower);
+            robot.leftForwardDrive.setPower(frontLeftPower * driveDirection);
+            robot.leftDrive.setPower(backLeftPower * driveDirection);
+            robot.rightForwardDrive.setPower(frontRightPower * driveDirection);
+            robot.rightDrive.setPower(-backRightPower * driveDirection);
+            if (gamepad1.y) {
+                if (driveDirection == 1) {
+                    driveDirection = -1;
+                }
+                if (driveDirection == -1) {
+                    driveDirection = 1;
+                }
+            }
 
-            if(gamepad2.left_stick_y != 0) {
-                robot.slide1.setPower(gamepad2.left_stick_y);
-                robot.slide2.setPower(-gamepad2.left_stick_y);
+            if (gamepad2.left_stick_y != 0) {
+                robot.slide1.setPower(-gamepad2.left_stick_y);
+                robot.slide2.setPower(gamepad2.left_stick_y * 0.975);
+                target = armPos;
+                //target2 = armPos2;
+            } else {
+                robot.slide1.setPower(power);
+                robot.slide2.setPower(power2);
             }
-            if(gamepad2.left_bumper)
-                robot.claw.setPosition(clawOpen);
-            if(gamepad2.right_bumper)
+
+
+            if (gamepad2.x) {
+                if (plane) {
+                    plane = false;
+                } else {
+                    plane = true;
+                }
+            }
+            if (plane) {
+                robot.plane.setPower(1);
+            } else {
+                robot.plane.setPower(0);
+            }
+
+            if (gamepad1.left_bumper) {
+                robot.claw.setPosition(clawOpen1);
+            }
+            if (gamepad2.left_trigger > 0) {
+                robot.claw.setPosition(clawOpen2);
+            }
+            if (gamepad2.right_bumper) { // Close claw
                 robot.claw.setPosition(clawClosed);
-            if(gamepad2.dpad_down) {
-                robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
-                robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
             }
-            if(gamepad2.dpad_up) {
+            if (gamepad2.a) { // Move arm to the inside
+                robot.arm1.setPosition(1.0);
+                robot.arm2.setPosition(0);
+                robot.wrist.setPosition(wristInside);
+            }
+            if (gamepad2.y) { // Move arm to the outside
+                robot.arm1.setPosition(yPos1);
+                robot.arm2.setPosition(yPos2);
+                robot.wrist.setPosition(wristOutside);
+            }
+            // Move down one pixel
+            if (gamepad2.dpad_down && gamepad2.dpad_down != prevDDown && gamepad2.right_stick_y == 0) {
+                dashboard.getTelemetry().addData("arm1Pos ", robot.arm1.getPosition());
+                dashboard.getTelemetry().addData("arm2Pos ", robot.arm2.getPosition());
+                dashboard.getTelemetry().update();
                 robot.arm1.setPosition(robot.arm1.getPosition() + onePixel);
                 robot.arm2.setPosition(robot.arm2.getPosition() - onePixel);
             }
+            // Move up one pixel
+            if (gamepad2.dpad_up && gamepad2.dpad_up != prevDUp) {
+                dashboard.getTelemetry().addData("arm1Pos ", robot.arm1.getPosition());
+                dashboard.getTelemetry().addData("arm2Pos ", robot.arm2.getPosition());
+                dashboard.getTelemetry().update();
+                robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+            }
+            prevDDown = gamepad2.dpad_down;
+            prevDUp = gamepad2.dpad_up;
+            telemetry.addData("pos ", armPos);
+            telemetry.addData("pos2 ", armPos2);
+            telemetry.addData("target ", target);
+            telemetry.addData("leftencoder ", robot.leftDrive.getCurrentPosition());
+            telemetry.addData("leftfencoder ", robot.leftForwardDrive.getCurrentPosition());
+            telemetry.addData("rightfencoder ", robot.rightForwardDrive.getCurrentPosition());
 
+            updateTelemetry(telemetry);
         }
+
     }
-}
+    }
+
+
+
 
