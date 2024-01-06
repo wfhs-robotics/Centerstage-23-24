@@ -64,7 +64,9 @@ public class Hardware
     public DcMotor hangRotate = null;
     public CRServo plane = null;
     public Servo claw = null;
-
+    public static double clawOpen1 = .5;
+    public static double clawOpen2 = 1;
+    public static double clawClosed = 0;
 
 
 
