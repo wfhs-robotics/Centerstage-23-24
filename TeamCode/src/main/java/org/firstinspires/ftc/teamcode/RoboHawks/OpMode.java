@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.RoboHawks;
 
+import static org.firstinspires.ftc.teamcode.RoboHawks.Hardware.*;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -72,15 +74,19 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 public class OpMode extends LinearOpMode {
     private boolean sean = false;
     private PIDController controller;
-
+    private PIDController controller2;
     public static double p = 0.004, i = 0, d = 0.0001;
-    public static double f = 0.1;
-    public static double aPos = 0;
-    public static double yPos = .65;
-    public static double clawOpen = .5;
-    public static double clawClose = -1;
-    private final double ticksInDegrees = 1425.1 / 360.0  ;
+    public static double f = 0.11;
+    public static double p2 = 0.004, i2 = 0, d2 = 0.0001;
+    public static double f2 = 0.11;
+
+    public static int target = 0;
+    public static int target2 = 0;
+    private final double ticks_in_degrees = 1425.1 / 360;
     boolean plane = false;
+    boolean prevA = false;
+    boolean prevLeftBumper = false;
+    boolean prevRightBumper = false;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
 
@@ -114,44 +120,57 @@ public class OpMode extends LinearOpMode {
                 double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
                 double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
                 double rx = gamepad1.right_stick_x;
-                double armPower = -gamepad2.left_stick_y;
 
                 // Arm Code is from: <insert link>
                 // Drive Code is from: <insert link>
-                int armPos;
-                double pid;
-                double ff;
-                double power;
+                controller.setPID(p, i, d);
+                int armPos = robot.arm.getCurrentPosition();
+                double pid = controller.calculate(armPos, target);
+                double ff = Math.cos(Math.toRadians(target / ticks_in_degrees)) * f;
+                double power = pid + ff;
 
-                if(armPower != 0) {
-                    telemetry.addData(">", "Moving Arm");
-                    telemetry.update();
-                    robot.arm.setPower(armPower);
+                controller2.setPID(p2, i2, d2);
+                int armPos2 = robot.slide.getCurrentPosition();
+                double pid2 = controller.calculate(armPos2, -target2);
+                double ff2 = Math.cos(Math.toRadians(-target2 / ticks_in_degrees)) * f2;
+                double power2 = pid2 + ff2;
+
+                if (gamepad2.left_stick_y != 0) {
+                    robot.arm.setPower(-gamepad2.left_stick_y);
+                    target = armPos;
+                } else {
+                    robot.arm.setPower(power);
+                }
+                if (gamepad2.right_stick_y != 0) {
+                    robot.arm.setPower(-gamepad2.left_stick_y);
+                    robot.slide.setPower(gamepad2.left_stick_y);
+                    target2 = armPos;
+                } else {
+                    robot.slide.setPower(power2);
                 }
 
-                if(armPower == 0) {
-                     telemetry.addData(">", "Holding Arm");
-                     telemetry.update();
-                     armPos = -robot.arm.getCurrentPosition();
-                     pid = controller.calculate(armPos, -robot.arm.getCurrentPosition());
-                     ff = Math.cos(Math.toRadians(-robot.arm.getCurrentPosition() / ticksInDegrees)) * f;
-                     power = pid + ff;
-                     robot.arm.setPower(-power);
-                }
-                if(gamepad2.y)
-                    //robot.wrist.setPosition(yPos);
-                if(gamepad2.a)
-                    //robot.wrist.setPosition(aPos);
+                if(gamepad2.left_trigger > 0)
+                    robot.claw.setPosition(clawOpen1);
                 if(gamepad2.left_bumper)
-                    robot.claw.setPosition(clawOpen);
+                    robot.claw.setPosition(clawOpen2);
                 if(gamepad2.right_bumper)
-                    robot.claw.setPosition(clawClose);
-                if(gamepad2.x) {
-                    if(plane) {
-                        plane = false;
-                    } else {
-                        plane = true;
-                    }
+                    robot.claw.setPosition(clawClosed);
+
+
+                if (gamepad1.a && gamepad1.a != prevA) {
+                    plane = !plane;
+                }
+                if (gamepad1.right_bumper && gamepad1.right_bumper != prevA) {
+                    robot.hangRotate.setPower(0);
+                }
+                if (gamepad1.left_bumper && gamepad1.left_bumper!= prevA) {
+                    robot.hangRotate.setPower(1);
+                }
+                if(gamepad1.left_trigger > 0) {
+                    robot.hangSpin.setPower(gamepad1.left_trigger);
+                }
+                if(gamepad1.right_trigger > 0) {
+                    robot.hangSpin.setPower(gamepad1.right_trigger);
                 }
                 if(plane) {
                     robot.plane.setPower(.8);
@@ -159,6 +178,7 @@ public class OpMode extends LinearOpMode {
                 if(!plane) {
                     robot.plane.setPower(0);
                 }
+
 
                 // Denominator is the largest motor power (absolute value) or 1
                 // This ensures all the powers maintain the same ratio,
@@ -173,6 +193,12 @@ public class OpMode extends LinearOpMode {
                 robot.leftDrive.setPower(backLeftPower);
                 robot.rightForwardDrive.setPower(frontRightPower);
                 robot.rightDrive.setPower(backRightPower);
+                robot.arm.setPower(power);
+                robot.slide.setPower(power2);
+
+                prevA = gamepad1.a;
+                prevLeftBumper = gamepad1.left_bumper;
+                prevRightBumper = gamepad1.right_bumper;
             }
         }
     }
