@@ -31,8 +31,8 @@ import org.firstinspires.ftc.teamcode.RoadRunner.util.DashboardUtil;
 public class Align extends LinearOpMode {
 
     public static double DRAWING_TARGET_RADIUS = 2;
-    public static double x = 0;
-    public static double y = 0;
+    public static double x = -59;
+    public static double y = 62;
 
     // Define 2 states, driver control or alignment control
     enum Mode {
@@ -61,8 +61,8 @@ public class Align extends LinearOpMode {
 
         // Retrieve our pose from the PoseStorage.currentPose static field
         // See AutoTransferPose.java for further details
-        drive.getLocalizer().setPoseEstimate(PoseStorage.currentPose);
-
+        //drive.getLocalizer().setPoseEstimate(PoseStorage.currentPose);
+        drive.getLocalizer().setPoseEstimate(new Pose2d(14, -62, Math.toRadians(90)));
         // Set input bounds for the heading controller
         // Automatically handles overflow
         headingController.setInputBounds(-Math.PI, Math.PI);
@@ -109,8 +109,8 @@ public class Align extends LinearOpMode {
                     // Create a vector from the gamepad x/y inputs which is the field relative movement
                     // Then, rotate that vector by the inverse of that heading for field centric control
                     Vector2d fieldFrameInput = new Vector2d(
-                            -gamepad1.left_stick_x,
-                            gamepad1.left_stick_y
+                            gamepad1.left_stick_x,
+                            -gamepad1.left_stick_y
                     );
                     Vector2d robotFrameInput = fieldFrameInput.rotated(-poseEstimate.getHeading());
 

@@ -139,9 +139,9 @@ public class OpMode extends LinearOpMode {
                      robot.arm.setPower(-power);
                 }
                 if(gamepad2.y)
-                    robot.wrist.setPosition(yPos);
+                    //robot.wrist.setPosition(yPos);
                 if(gamepad2.a)
-                    robot.wrist.setPosition(aPos);
+                    //robot.wrist.setPosition(aPos);
                 if(gamepad2.left_bumper)
                     robot.claw.setPosition(clawOpen);
                 if(gamepad2.right_bumper)

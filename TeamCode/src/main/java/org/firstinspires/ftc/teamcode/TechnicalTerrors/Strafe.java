@@ -126,6 +126,7 @@ public class Strafe extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            Pose2d poseEstimate = drive.getPoseEstimate();
 
             controller.setPID(p, i, d);
             int armPos = robot.slide1.getCurrentPosition();
@@ -139,32 +140,7 @@ public class Strafe extends LinearOpMode {
             double ff2 = Math.cos(Math.toRadians(-target / ticks_in_degrees)) * f2;
             double power2 = pid2 + ff2;
 
-
-            double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
-            double x = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
-            double rx = -gamepad1.right_stick_x;
-
-
-            // Drive code off of GM-zero
-            Pose2d poseEstimate = drive.getPoseEstimate();
-
-            // Create a vector from the gamepad x/y inputs
-            // Then, rotate that vector by the inverse of that heading
-            Vector2d input = new Vector2d(
-                    -gamepad1.left_stick_x,
-                    gamepad1.left_stick_y
-            ).rotated(-poseEstimate.getHeading());
-
-            // Pass in the rotated input + right stick value for rotation
-            // Rotation is not part of the rotated input thus must be passed in separately
-            drive.setWeightedDrivePower(
-                    new Pose2d(
-                            input.getX(),
-                            input.getY(),
-                            -gamepad1.right_stick_x
-                    )
-            );
-
+            fieldCentric(drive, poseEstimate);
             // Update everything. Odometry. Etc.
             drive.update();
 
@@ -239,6 +215,36 @@ public class Strafe extends LinearOpMode {
             updateTelemetry(telemetry);
         }
 
+    }
+    public void alignToPoint() {
+
+    }
+    public void fieldCentric(SampleMecanumDrive drive, Pose2d poseEstimate){
+        // Drive code off of GM-zero
+
+
+        // Create a vector from the gamepad x/y inputs
+        // Then, rotate that vector by the inverse of that heading
+        Vector2d input = new Vector2d(
+                -gamepad1.left_stick_x,
+                gamepad1.left_stick_y
+        ).rotated(-poseEstimate.getHeading());
+
+        // Pass in the rotated input + right stick value for rotation
+        // Rotation is not part of the rotated input thus must be passed in separately
+        drive.setWeightedDrivePower(
+                new Pose2d(
+                        input.getX(),
+                        input.getY(),
+                        -gamepad1.right_stick_x
+                )
+        );
+
+    }
+    public void robotCentric(){
+        double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
+        double x = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
+        double rx = -gamepad1.right_stick_x;
     }
 }
 
