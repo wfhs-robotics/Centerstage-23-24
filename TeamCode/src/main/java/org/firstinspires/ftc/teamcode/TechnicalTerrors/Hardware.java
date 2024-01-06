@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -54,6 +55,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
  * Servo channel:  Servo to open left claw:  "left_hand"
  * Servo channel:  Servo to open right claw: "right_hand"
  */
+@Config
 public class Hardware
 {
     /* Public OpMode members. */
@@ -71,6 +73,17 @@ public class Hardware
     public WebcamName webcam = null;
     public BNO055IMU imu = null;
     public CRServo plane = null;
+
+    /* Variables used to be in Strafe */
+    public static double onePixel = .02;
+    public static double aPos = .65;
+    public static double yPos1 = 0;
+    public static double yPos2 = .525;
+    public static double wristOutside = .55;
+    public static double wristInside = 0.015;
+    public static double clawClosed = .9;
+    public static double clawOpen1 = .835;
+    public static double clawOpen2 = .725;
 
 
     /* local OpMode members. */
@@ -112,6 +125,7 @@ public class Hardware
         wrist.setPosition(.015);
         arm1.setPosition(.98);
         arm2.setPosition(.02);
+        claw.setPosition(clawClosed);
 
 
         // Set all motors to run without encoders.

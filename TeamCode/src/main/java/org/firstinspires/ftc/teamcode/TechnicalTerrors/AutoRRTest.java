@@ -1,5 +1,12 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen1;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen2;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.onePixel;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.wristInside;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.yPos1;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.yPos2;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -15,10 +22,16 @@ import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySe
  * This is a simple routine to test translational drive capabilities.
  */
 @Config
-@Autonomous(name = "RRTest", group = "Pushbot")
+@Autonomous(name = "Autonomous", group = "Pushbot")
 public class AutoRRTest extends LinearOpMode {
-    public static double DISTANCE = 31.5; // in
-    public static double toBoard = 42;
+    public static double DISTANCE = 36.5; // in
+    public static double toBoard = 42.5;
+    public static double wristNum= .45;
+    public static String spike = "Left";
+    public static double rightReverse = 20.5;
+    public static double leftReverse = 2;
+    public static double rightBoardStrafe = 13;
+    public static double leftParkStrafe = 31;
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Hardware robot =  new Hardware();
 
@@ -32,10 +45,133 @@ public class AutoRRTest extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
 
-        TrajectorySequence redAlliance = drive.trajectorySequenceBuilder(startPose)
+        TrajectorySequence redAllianceMiddle = drive.trajectorySequenceBuilder(startPose)
+                .forward(31.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(6)
+                .turn(Math.toRadians(90))
+                .back(42.5)
+                .strafeRight(4)
+                .addTemporalMarker(() -> {
+                   robot.arm1.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristNum);
+                })
+                .waitSeconds(1)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen2);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristInside);
+                })
+                .forward(2)
+                .strafeLeft(leftParkStrafe)
+                .build();
+        TrajectorySequence redAllianceRight = drive.trajectorySequenceBuilder(startPose)
+                .forward(36.5)
+                .turn(Math.toRadians(90))
+                .back(20.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(toBoard - 20.5)
+                .strafeLeft(rightBoardStrafe)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristNum);
+                })
+                .waitSeconds(1)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen2);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristInside);
+                })
+                .forward(2)
+                .strafeLeft(leftParkStrafe)
+                .build();
+
+        TrajectorySequence redAllianceLeft = drive.trajectorySequenceBuilder(startPose)
                 .forward(DISTANCE)
                 .turn(Math.toRadians(90))
-                .back(toBoard)
+                .forward(leftReverse)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(toBoard + leftReverse)
+                .strafeRight(2)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristNum);
+                })
+                .waitSeconds(1)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen2);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristInside);
+                })
+                .strafeLeft(leftParkStrafe)
+                .forward(2)
+
                 .build();
 
 
@@ -43,15 +179,20 @@ public class AutoRRTest extends LinearOpMode {
         waitForStart();
 
         if (isStopRequested()) return;
+        if(spike.equals("Middle"))
+            drive.followTrajectorySequence(redAllianceMiddle);
+        else if(spike.equals("Right"))
+            drive.followTrajectorySequence(redAllianceRight);
+        else if(spike.equals("Left"))
+            drive.followTrajectorySequence(redAllianceLeft);
 
-        drive.followTrajectorySequence(redAlliance);
-
+        PoseStorage.currentPose = drive.getPoseEstimate();
         Pose2d poseEstimate = drive.getPoseEstimate();
         telemetry.addData("finalX", poseEstimate.getX());
         telemetry.addData("finalY", poseEstimate.getY());
         telemetry.addData("finalHeading", poseEstimate.getHeading());
         telemetry.update();
-
         while (!isStopRequested() && opModeIsActive()) ;
     }
+
 }

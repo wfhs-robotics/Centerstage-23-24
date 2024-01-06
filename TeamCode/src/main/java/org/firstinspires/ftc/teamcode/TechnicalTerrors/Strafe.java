@@ -32,10 +32,14 @@ package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 
 
 /**
@@ -83,15 +87,7 @@ public class Strafe extends LinearOpMode {
     private final double ticks_in_degrees = 1425.1 / 360;
     private boolean sean = false;
 
-    public static double onePixel = .02;
-    public static double aPos = .65;
-    public static double yPos1 = 0;
-    public static double yPos2 = .525;
-    public static double wristOutside = .55;
-    public static double wristInside = 0.015;
-    public static double clawClosed = .9;
-    public static double clawOpen1 = .525;
-    public static double clawOpen2 = .725;
+
     public int driveDirection = 1;
 
     boolean prevDDown = false;
@@ -101,6 +97,7 @@ public class Strafe extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware();
 
+
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
 
@@ -108,6 +105,7 @@ public class Strafe extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         controller = new PIDController(p, i, d);
         controller2 = new PIDController(p2, i2, d2);
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -148,24 +146,28 @@ public class Strafe extends LinearOpMode {
 
 
             // Drive code off of GM-zero
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = (y + x + rx) / denominator;
-            double backLeftPower = (y - x + rx) / denominator;
-            double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower = (y + x - rx) / denominator;
+            Pose2d poseEstimate = drive.getPoseEstimate();
 
-            robot.leftForwardDrive.setPower(frontLeftPower * driveDirection);
-            robot.leftDrive.setPower(backLeftPower * driveDirection);
-            robot.rightForwardDrive.setPower(frontRightPower * driveDirection);
-            robot.rightDrive.setPower(-backRightPower * driveDirection);
-            if (gamepad1.y) {
-                if (driveDirection == 1) {
-                    driveDirection = -1;
-                }
-                if (driveDirection == -1) {
-                    driveDirection = 1;
-                }
-            }
+            // Create a vector from the gamepad x/y inputs
+            // Then, rotate that vector by the inverse of that heading
+            Vector2d input = new Vector2d(
+                    -gamepad1.left_stick_x,
+                    gamepad1.left_stick_y
+            ).rotated(-poseEstimate.getHeading());
+
+            // Pass in the rotated input + right stick value for rotation
+            // Rotation is not part of the rotated input thus must be passed in separately
+            drive.setWeightedDrivePower(
+                    new Pose2d(
+                            input.getX(),
+                            input.getY(),
+                            -gamepad1.right_stick_x
+                    )
+            );
+
+            // Update everything. Odometry. Etc.
+            drive.update();
+
 
             if (gamepad2.left_stick_y != 0) {
                 robot.slide1.setPower(-gamepad2.left_stick_y);
@@ -191,55 +193,54 @@ public class Strafe extends LinearOpMode {
                 robot.plane.setPower(0);
             }
 
-            if (gamepad1.left_bumper) {
-                robot.claw.setPosition(clawOpen1);
+            if (gamepad2.left_bumper) {
+                robot.claw.setPosition(robot.clawOpen1);
             }
             if (gamepad2.left_trigger > 0) {
-                robot.claw.setPosition(clawOpen2);
+                robot.claw.setPosition(robot.clawOpen2);
             }
             if (gamepad2.right_bumper) { // Close claw
-                robot.claw.setPosition(clawClosed);
+                robot.claw.setPosition(robot.clawClosed);
             }
             if (gamepad2.a) { // Move arm to the inside
-                robot.arm1.setPosition(.98);
-                robot.arm2.setPosition(0);
-                robot.wrist.setPosition(wristInside);
+                robot.arm1.setPosition(.96);
+                robot.arm2.setPosition(.04);
+                robot.wrist.setPosition(robot.wristInside);
             }
             if (gamepad2.y) { // Move arm to the outside
-                robot.arm1.setPosition(yPos1);
-                robot.arm2.setPosition(yPos2);
-                robot.wrist.setPosition(wristOutside);
+                robot.arm1.setPosition(robot.yPos1);
+                robot.arm2.setPosition(robot.yPos2);
+                robot.wrist.setPosition(robot.wristOutside);
             }
             // Move down one pixel
             if (gamepad2.dpad_down && gamepad2.dpad_down != prevDDown && gamepad2.right_stick_y == 0) {
                 dashboard.getTelemetry().addData("arm1Pos ", robot.arm1.getPosition());
                 dashboard.getTelemetry().addData("arm2Pos ", robot.arm2.getPosition());
                 dashboard.getTelemetry().update();
-                robot.arm1.setPosition(robot.arm1.getPosition() + onePixel);
-                robot.arm2.setPosition(robot.arm2.getPosition() - onePixel);
+                robot.arm1.setPosition(robot.arm1.getPosition() + robot.onePixel);
+                robot.arm2.setPosition(robot.arm2.getPosition() - robot.onePixel);
             }
             // Move up one pixel
             if (gamepad2.dpad_up && gamepad2.dpad_up != prevDUp) {
                 dashboard.getTelemetry().addData("arm1Pos ", robot.arm1.getPosition());
                 dashboard.getTelemetry().addData("arm2Pos ", robot.arm2.getPosition());
                 dashboard.getTelemetry().update();
-                robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
-                robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                robot.arm1.setPosition(robot.arm1.getPosition() - robot.onePixel);
+                robot.arm2.setPosition(robot.arm2.getPosition() + robot.onePixel);
             }
+
             prevDDown = gamepad2.dpad_down;
             prevDUp = gamepad2.dpad_up;
-            telemetry.addData("pos ", armPos);
-            telemetry.addData("pos2 ", armPos2);
-            telemetry.addData("target ", target);
-            telemetry.addData("leftencoder ", robot.leftDrive.getCurrentPosition());
-            telemetry.addData("leftfencoder ", robot.leftForwardDrive.getCurrentPosition());
-            telemetry.addData("rightfencoder ", robot.rightForwardDrive.getCurrentPosition());
+            // Print pose to telemetry
+            telemetry.addData("x", poseEstimate.getX());
+            telemetry.addData("y", poseEstimate.getY());
+            telemetry.addData("heading", poseEstimate.getHeading());
 
             updateTelemetry(telemetry);
         }
 
     }
-    }
+}
 
 
 

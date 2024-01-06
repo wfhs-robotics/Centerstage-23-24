@@ -58,11 +58,12 @@ public class Hardware
     public DcMotor  rightDrive  = null;
     public DcMotor  leftForwardDrive    = null;
     public DcMotor  rightForwardDrive    = null;
-    public Servo cameraServo = null;
-    public Servo claw = null;
-    public Servo wrist = null;
     public DcMotor arm = null;
+    public DcMotor slide = null;
+    public DcMotor hangSpin = null;
+    public DcMotor hangRotate = null;
     public CRServo plane = null;
+    public Servo claw = null;
 
 
 
@@ -86,10 +87,12 @@ public class Hardware
         rightDrive = hwMap.get(DcMotor.class, "rightDrive");
         leftForwardDrive    = hwMap.get(DcMotor.class, "leftForwardDrive");
         rightForwardDrive = hwMap.get(DcMotor.class, "rightForwardDrive");
-        claw = hwMap.get(Servo.class, "claw");
-        wrist = hwMap.get(Servo.class, "wrist");
         arm = hwMap.get(DcMotor.class, "arm");
-        plane = hwMap.get(CRServo.class, "plane");
+        slide = hwMap.get(DcMotor.class, "slide");
+        hangSpin = hwMap.get(DcMotor.class, "hangSpin");
+        hangRotate = hwMap.get(DcMotor.class, "handRotate");
+
+
 
 
 
