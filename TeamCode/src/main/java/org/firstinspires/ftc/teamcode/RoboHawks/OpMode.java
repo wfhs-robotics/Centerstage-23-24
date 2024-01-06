@@ -189,8 +189,8 @@ public class OpMode extends LinearOpMode {
                 double frontRightPower = (y - x - rx) / denominator;
                 double backRightPower = (y + x - rx) / denominator;
 
-                robot.leftForwardDrive.setPower(frontLeftPower);
-                robot.leftDrive.setPower(backLeftPower);
+                robot.leftForwardDrive.setPower(-frontLeftPower);
+                robot.leftDrive.setPower(-backLeftPower);
                 robot.rightForwardDrive.setPower(frontRightPower);
                 robot.rightDrive.setPower(backRightPower);
                 robot.arm.setPower(power);
