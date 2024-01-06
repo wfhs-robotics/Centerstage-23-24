@@ -170,6 +170,7 @@ public class Align extends LinearOpMode {
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
             telemetry.update();
+
         }
     }
 }

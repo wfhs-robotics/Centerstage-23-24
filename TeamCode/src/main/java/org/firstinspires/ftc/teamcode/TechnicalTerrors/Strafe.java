@@ -39,6 +39,7 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.acmerobotics.roadrunner.control.PIDFController;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 
@@ -115,7 +116,9 @@ public class Strafe extends LinearOpMode {
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
-
+    // Set input bounds for the heading controller
+    // Automatically handles overflow
+    headingController.setInputBounds(-Math.PI, Math.PI);
 
     @Override
     public void runOpMode() {
@@ -133,6 +136,9 @@ public class Strafe extends LinearOpMode {
         robot.arm1.setPosition(1.0);
         robot.arm2.setPosition(0);
         target = 0;
+        // Retrieve our pose from the PoseStorage.currentPose static field
+        // See AutoTransferPose.java for further details
+        drive.getLocalizer().setPoseEstimate(PoseStorage.currentPose);
 //        robot.leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 //        robot.leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         // Send telemetry message to signify robot waiting;
@@ -226,6 +232,7 @@ public class Strafe extends LinearOpMode {
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
+            PoseStorage.currentPose = drive.getPoseEstimate();
 
             updateTelemetry(telemetry);
         }
