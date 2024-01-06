@@ -93,6 +93,8 @@ public class Hardware
         slide = hwMap.get(DcMotor.class, "slide");
         hangSpin = hwMap.get(DcMotor.class, "hangSpin");
         hangRotate = hwMap.get(DcMotor.class, "handRotate");
+        claw = hwMap.get(Servo.class, "claw");
+//        plane = hwMap.get(CRServo.class, "plane");
 
 
 

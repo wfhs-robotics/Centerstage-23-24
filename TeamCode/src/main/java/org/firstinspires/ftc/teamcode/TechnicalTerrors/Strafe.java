@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -86,6 +87,9 @@ public class Strafe extends LinearOpMode {
     public static int target2 = 0;
     private final double ticks_in_degrees = 1425.1 / 360;
     private boolean sean = false;
+    public static double DRAWING_TARGET_RADIUS = 2;
+    public static double x2 = -59;
+    public static double y2 = 62;
 
 
     public int driveDirection = 1;
@@ -96,7 +100,18 @@ public class Strafe extends LinearOpMode {
     String high = "null";
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware();
+    enum Mode {
+        NORMAL_CONTROL,
+        ALIGN_TO_POINT
+    }
+    private Align.Mode currentMode = Align.Mode.NORMAL_CONTROL;
+    // Declare a PIDF Controller to regulate heading
+    // Use the same gains as SampleMecanumDrive's heading controller
+    private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
 
+    // Declare a target vector you'd like your bot to align with
+    // Can be any x/y coordinate of your choosing
+    private Vector2d targetPosition = new Vector2d(x2, y2);
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
@@ -242,8 +257,8 @@ public class Strafe extends LinearOpMode {
 
     }
     public void robotCentric(){
-        double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
-        double x = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
+        double y1 = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
+        double x1 = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
         double rx = -gamepad1.right_stick_x;
     }
 }

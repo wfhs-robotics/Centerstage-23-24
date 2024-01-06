@@ -97,6 +97,7 @@ public class OpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
         controller = new PIDController(p, i, d);
+        controller2 = new PIDController(p2, i2, d2);
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -116,7 +117,6 @@ public class OpMode extends LinearOpMode {
             if (isStopRequested()) return;
 
             while (opModeIsActive()) {
-                controller.setPID(p,i,d);
                 double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
                 double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
                 double rx = gamepad1.right_stick_x;
@@ -172,12 +172,12 @@ public class OpMode extends LinearOpMode {
                 if(gamepad1.right_trigger > 0) {
                     robot.hangSpin.setPower(gamepad1.right_trigger);
                 }
-                if(plane) {
-                    robot.plane.setPower(.8);
-                }
-                if(!plane) {
-                    robot.plane.setPower(0);
-                }
+//                if(plane) {
+//                    robot.plane.setPower(.8);
+//                }
+//                if(!plane) {
+//                    robot.plane.setPower(0);
+//                }
 
 
                 // Denominator is the largest motor power (absolute value) or 1
