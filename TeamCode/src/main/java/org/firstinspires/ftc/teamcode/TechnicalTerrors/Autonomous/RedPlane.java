@@ -27,8 +27,12 @@ import org.firstinspires.ftc.teamcode.TechnicalTerrors.PoseStorage;
 @Config
 @Autonomous(name = "RedPlane", group = "Pushbot")
 public class RedPlane extends LinearOpMode {
-    public static double DISTANCE = 36.5; // in
-    public static double toBoard = 42.5;
+    public static double DISTANCE = 31.5; // in
+    public static double toMid = 42.5;
+    public static double toOtherSide = 25;
+    public static double x = 48;
+    public static double y = -34;
+    public static double park = 25;
     public static double wristNum= .45;
     public static String spike = "Left";
     public static double rightReverse = 20.5;
@@ -49,8 +53,7 @@ public class RedPlane extends LinearOpMode {
 
 
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)
-        drive.trajectorySequenceBuilder(startPose)
-                .forward(31.5)
+                .forward(DISTANCE)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
                 })
@@ -61,10 +64,10 @@ public class RedPlane extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
-                .forward(20)
+                .forward(toMid)
                 .turn(Math.toRadians(-90))
-                .forward(25)
-                .splineTo(new Vector2d(48,-34), Math.toRadians(180))
+                .forward(toOtherSide)
+                .splineTo(new Vector2d(x,-y), Math.toRadians(180))
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -88,7 +91,7 @@ public class RedPlane extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristInside);
                 })
-                .strafeLeft(25)
+                .strafeLeft(park)
                 .build();
 
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
@@ -147,7 +150,7 @@ public class RedPlane extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
-                .back(toBoard + leftReverse)
+//                .back(toBoard + leftReverse)
                 .strafeRight(2)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);

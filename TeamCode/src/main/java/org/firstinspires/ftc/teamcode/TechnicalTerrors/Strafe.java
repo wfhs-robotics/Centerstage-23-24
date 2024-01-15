@@ -243,14 +243,19 @@ public class Strafe extends LinearOpMode {
                 robot.claw.setPosition(robot.clawClosed);
             }
             if (gamepad2.a) { // Move arm to the inside
-                robot.arm1.setPosition(.96);
-                robot.arm2.setPosition(.04);
+                robot.arm1.setPosition(1 - robot.yPos1);
+                robot.arm2.setPosition(robot.yPos1);
                 robot.wrist.setPosition(robot.wristInside);
             }
             if (gamepad2.y) { // Move arm to the outside
-                robot.arm1.setPosition(robot.yPos1);
+                robot.arm1.setPosition(1 - robot.yPos2);
                 robot.arm2.setPosition(robot.yPos2);
                 robot.wrist.setPosition(robot.wristOutside);
+            }
+            if (gamepad2.b) { // Move arm to the outside
+                robot.arm1.setPosition(1 - robot.yPos3);
+                robot.arm2.setPosition(robot.yPos3);
+                robot.wrist.setPosition(robot.wristOutside2);
             }
             // Move down one pixel
             if (gamepad2.dpad_down && gamepad2.dpad_down != prevDDown && gamepad2.right_stick_y == 0) {
