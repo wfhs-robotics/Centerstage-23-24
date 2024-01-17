@@ -84,9 +84,9 @@ public class Hardware
     public static double wristOutside = 0.53;
     public static double wristOutside2 = 0.425;
     public static double wristInside = 0.015;
-    public static double clawClosed = .9;
-    public static double clawOpen1 = 0.81;
-    public static double clawOpen2 = .725;
+    public static double clawClosed = .6;
+    public static double clawOpen1 = 0.51;
+    public static double clawOpen2 = 0.4;
 
 
     /* local OpMode members. */
