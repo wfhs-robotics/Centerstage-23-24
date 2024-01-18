@@ -53,10 +53,13 @@ public class RedBoard extends LinearOpMode {
     public static double leftReverse = 2;
     public static double rightBoardStrafe = 13;
     public static double parkDistance = 31;
-    public static boolean dev = true;
+    public static boolean dev = false;
     double cX = 0;
     double cY = 0;
     double width = 0;
+    public static double x1 = 4;
+    public static double x2 = 13;
+    public static double x3 = 2;
     private OpenCvCamera controlHubCam;  // Use OpenCvCamera class from FTC SDK
     private static int CAMERA_WIDTH = 960; // width  of wanted camera resolution
     private static int CAMERA_HEIGHT = 720; // height of wanted camera resolution
@@ -92,7 +95,7 @@ public class RedBoard extends LinearOpMode {
                 .back(6)
                 .turn(Math.toRadians(90))
                 .back(42.5)
-                .strafeRight(4)
+                .strafeRight(x1)
                 .addTemporalMarker(() -> {
                    robot.arm1.setPosition(yPos1);
                 })
@@ -118,6 +121,7 @@ public class RedBoard extends LinearOpMode {
                 })
                 .forward(2)
                 .strafeLeft(parkDistance)
+                .back(2)
                 .build();
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
                 .forward(36.5)
@@ -134,7 +138,7 @@ public class RedBoard extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(toBoard - 20.5)
-                .strafeLeft(rightBoardStrafe)
+                .strafeLeft(x2)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -160,6 +164,7 @@ public class RedBoard extends LinearOpMode {
                 })
                 .forward(2)
                 .strafeLeft(parkDistance)
+                .back(2)
                 .build();
 
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)
@@ -177,7 +182,7 @@ public class RedBoard extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(toBoard + leftReverse)
-                .strafeRight(2)
+                .strafeRight(x3)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -201,8 +206,9 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristInside);
                 })
-                .strafeLeft(31)
                 .forward(2)
+                .strafeLeft(31)
+                .back(2)
                 .build();
 
 
@@ -212,20 +218,25 @@ public class RedBoard extends LinearOpMode {
         if (isStopRequested()) return;
 
         if(!dev) {
-            if (cX > 570 && cY > 80 && cY < 250) {
-                drive.followTrajectorySequence(middle);
+            if (cX >= 0 && cX < 300) {
+                telemetry.addData("Status", "Left");
+                telemetry.update();
+                drive.followTrajectorySequence(left);
                 controlHubCam.stopStreaming();
                 controlHubCam.closeCameraDevice();
-                telemetry.addData("detect", "middle");
+            } else if (cX >= 300 && cX < 650) {
+                telemetry.addData("Status", "Middle");
                 telemetry.update();
-            } else if (cX < 400 && cY > 80 && cY < 250) {
-                drive.followTrajectorySequence(left);
-                telemetry.addData("detect", "left");
+                drive.followTrajectorySequence(middle);
+
+            } else if(cX >= 650) {
+                telemetry.addData("Status", "Right");
                 telemetry.update();
-            } else {
                 drive.followTrajectorySequence(right);
-                telemetry.addData("detect", "right");
-                telemetry.update();
+
+            } else {
+                drive.followTrajectorySequence(middle);
+                telemetry.addData("Status", "Detected no element, running middle path.");
             }
         } else {
             if (spike.equals("Middle"))

@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.RoadRunner.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware;
@@ -52,13 +53,21 @@ public class RedPlane extends LinearOpMode {
     public static double toOtherSide = 40.5;
     public static double x = 57;
     public static double y = -23;
+    public static double x1 = 59;
+    public static double y1 = -34;
+    public static double x2 = 59;
+    public static double y2 = -34.5;
+    public static double x3 = 59;
+    public static double y3 = -23;
+    public static double a1 = 0;
     public static double backToBoard =10;
     public static double park = 18;
     public static double wristNum= .45;
     public static String spike = "Left";
+    public static int pixelPos = 1;
     public static double rightReverse = 20.5;
     public static double leftReverse = 2;
-    public static boolean dev = true;
+    public static boolean dev = false;
     double cX = 0;
     double cY = 0;
     double width = 0;
@@ -99,9 +108,14 @@ public class RedPlane extends LinearOpMode {
                 .back(5)
                 .strafeLeft(13)
                 .forward(33.5)
-                .turn(Math.toRadians(-90))
-                .forward(40.5)
-                .splineToLinearHeading(new Pose2d(60,-28, Math.toRadians(180)), Math.toRadians(0))
+                .turn(Math.toRadians(90))
+                .back(50)
+                .lineToLinearHeading(new Pose2d(x1,y1, Math.toRadians(a1)),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
+                //.splineToLinearHeading(new Pose2d(x1,y1), Math.toRadians(a1),
+                        //SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                       // SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -133,7 +147,7 @@ public class RedPlane extends LinearOpMode {
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
                 .forward(32.5)
                 .turn(Math.toRadians(-90))
-                .forward(1)
+                .forward(.1)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
                 })
@@ -147,7 +161,9 @@ public class RedPlane extends LinearOpMode {
                 .back(5)
                 .strafeLeft(23)
                 .forward(30)
-                .splineToLinearHeading(new Pose2d(59,-35, Math.toRadians(180)), Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(x2,y2, Math.toRadians(180)), Math.toRadians(0),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -179,7 +195,7 @@ public class RedPlane extends LinearOpMode {
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)
                 .forward(34.5)
                 .turn(Math.toRadians(90))
-                .back(3)
+                .back(3.5)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
                 })
@@ -193,7 +209,9 @@ public class RedPlane extends LinearOpMode {
                 .back(5)
                 .strafeRight(22.5)
                 .back(40.5)
-                .splineToLinearHeading(new Pose2d(57.5, -22, Math.toRadians(180)), Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(x3, y3, Math.toRadians(180)), Math.toRadians(0),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -218,7 +236,7 @@ public class RedPlane extends LinearOpMode {
                     robot.wrist.setPosition(wristInside);
                 })
                 .forward(5)
-                .strafeRight(18)
+                .strafeRight(20)
                 .back(5)
                 .build();
 
@@ -229,20 +247,40 @@ public class RedPlane extends LinearOpMode {
         if (isStopRequested()) return;
 
         if(!dev) {
-            if (cX > 570 && cY > 80 && cY < 250) {
-                drive.followTrajectorySequence(middle);
-                controlHubCam.stopStreaming();
-                controlHubCam.closeCameraDevice();
-                telemetry.addData("detect", "middle");
-                telemetry.update();
-            } else if (cX < 400 && cY > 80 && cY < 250) {
-                drive.followTrajectorySequence(left);
-                telemetry.addData("detect", "left");
-                telemetry.update();
+            if(pixelPos == 1) {
+
+
+                if (cX > 0 && cX < 400) {
+                    drive.followTrajectorySequence(left);
+                    controlHubCam.stopStreaming();
+                    controlHubCam.closeCameraDevice();
+                    telemetry.addData("detect", "left");
+                    telemetry.update();
+                } else if (cX > 500 && cX < 750) {
+                    drive.followTrajectorySequence(middle);
+                    telemetry.addData("detect", "middle");
+                    telemetry.update();
+                } else if (cX > 750) {
+                    drive.followTrajectorySequence(right);
+                    telemetry.addData("detect", "right");
+                    telemetry.update();
+                }
             } else {
-                drive.followTrajectorySequence(right);
-                telemetry.addData("detect", "right");
-                telemetry.update();
+                if (cX > 0 && cX < 400) {
+                    drive.followTrajectorySequence(left);
+                    controlHubCam.stopStreaming();
+                    controlHubCam.closeCameraDevice();
+                    telemetry.addData("detect", "left");
+                    telemetry.update();
+                } else if (cX > 500 && cX < 750) {
+                    drive.followTrajectorySequence(middle);
+                    telemetry.addData("detect", "middle");
+                    telemetry.update();
+                } else if (cX > 750) {
+                    drive.followTrajectorySequence(right);
+                    telemetry.addData("detect", "right");
+                    telemetry.update();
+                }
             }
         } else {
             if (spike.equals("Middle"))
