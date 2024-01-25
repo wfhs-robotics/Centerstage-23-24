@@ -77,13 +77,16 @@ public class Hardware
     /* Variables used to be in Strafe */
     public static double onePixel = .02;
     public static double aPos = .65;
-    public static double yPos1 = 0;
-    public static double yPos2 = .525;
-    public static double wristOutside = .55;
+    public static double yPos1 = 0.09;
+    public static double yPos2 = 0.65;
+    public static double yPos3 = 0.75;
+    public static double yPos4 = .04;
+    public static double wristOutside = 0.53;
+    public static double wristOutside2 = 0.425;
     public static double wristInside = 0.015;
-    public static double clawClosed = .9;
-    public static double clawOpen1 = .835;
-    public static double clawOpen2 = .725;
+    public static double clawClosed = .6;
+    public static double clawOpen1 = 0.49;
+    public static double clawOpen2 = 0.4;
 
 
     /* local OpMode members. */
@@ -122,9 +125,9 @@ public class Hardware
         leftForwardDrive.setPower(0);
         rightForwardDrive.setPower(0);
 
-        wrist.setPosition(.015);
-        arm1.setPosition(.98);
-        arm2.setPosition(.02);
+        wrist.setPosition(wristInside);
+        arm1.setPosition(1 - yPos1);
+        arm2.setPosition(yPos1);
         claw.setPosition(clawClosed);
 
 

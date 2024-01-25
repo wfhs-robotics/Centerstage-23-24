@@ -30,8 +30,10 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -39,9 +41,10 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.acmerobotics.roadrunner.control.PIDFController;
 
+import org.firstinspires.ftc.teamcode.RoadRunner.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.RoadRunner.util.DashboardUtil;
 
 
 /**
@@ -92,9 +95,6 @@ public class Strafe extends LinearOpMode {
     public static double x2 = -59;
     public static double y2 = 62;
 
-
-    public int driveDirection = 1;
-
     boolean prevDDown = false;
     boolean prevDUp = false;
     boolean plane = false;
@@ -102,10 +102,12 @@ public class Strafe extends LinearOpMode {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware robot = new org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware();
     enum Mode {
-        NORMAL_CONTROL,
-        ALIGN_TO_POINT
+        ROBOT_CENTRIC,
+        ALIGN_TO_POINT,
+        FIELD_CENTRIC
+
     }
-    private Align.Mode currentMode = Align.Mode.NORMAL_CONTROL;
+    private Mode currentMode = Mode.ROBOT_CENTRIC;
     // Declare a PIDF Controller to regulate heading
     // Use the same gains as SampleMecanumDrive's heading controller
     private PIDFController headingController = new PIDFController(SampleMecanumDrive.HEADING_PID);
@@ -116,9 +118,6 @@ public class Strafe extends LinearOpMode {
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
-    // Set input bounds for the heading controller
-    // Automatically handles overflow
-    headingController.setInputBounds(-Math.PI, Math.PI);
 
     @Override
     public void runOpMode() {
@@ -139,6 +138,9 @@ public class Strafe extends LinearOpMode {
         // Retrieve our pose from the PoseStorage.currentPose static field
         // See AutoTransferPose.java for further details
         drive.getLocalizer().setPoseEstimate(PoseStorage.currentPose);
+        // Set input bounds for the heading controller
+        // Automatically handles overflow
+        headingController.setInputBounds(-Math.PI, Math.PI);
 //        robot.leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 //        robot.leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         // Send telemetry message to signify robot waiting;
@@ -147,8 +149,49 @@ public class Strafe extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            Pose2d poseEstimate = drive.getPoseEstimate();
+            Pose2d poseEstimate = drive.getLocalizer().getPoseEstimate();
 
+            // Declare a drive direction
+            // Pose representing desired x, y, and angular velocity
+            Pose2d driveDirection = new Pose2d();
+
+            telemetry.addData("mode", currentMode);
+
+            // Declare telemetry packet for dashboard field drawing
+            TelemetryPacket packet = new TelemetryPacket();
+            Canvas fieldOverlay = packet.fieldOverlay();
+
+            switch (currentMode) {
+                case ROBOT_CENTRIC:
+                    // Switch into alignment mode if `a` is pressed
+                    if (gamepad1.a) {
+                        currentMode = Mode.ALIGN_TO_POINT;
+                    }
+                    if (gamepad1.x) {
+                        currentMode = Mode.FIELD_CENTRIC;
+                    }
+                    driveDirection = robotCentric();
+                    break;
+                case ALIGN_TO_POINT:
+                    // Switch back into normal driver control mode if `b` is pressed
+                    if (gamepad1.b) {
+                        currentMode = Mode.ROBOT_CENTRIC;
+                    }
+                    if (gamepad1.x) {
+                        currentMode = Mode.FIELD_CENTRIC;
+                    }
+                    driveDirection = alignToPoint(poseEstimate, fieldOverlay);
+                    break;
+                case FIELD_CENTRIC:
+                    if (gamepad1.b) {
+                        currentMode = Mode.ROBOT_CENTRIC;
+                    }
+                    if (gamepad1.a) {
+                        currentMode = Mode.ALIGN_TO_POINT;
+                    }
+                    driveDirection = fieldCentric(drive, poseEstimate);
+                    break;
+            }
             controller.setPID(p, i, d);
             int armPos = robot.slide1.getCurrentPosition();
             double pid = controller.calculate(armPos, target);
@@ -161,9 +204,9 @@ public class Strafe extends LinearOpMode {
             double ff2 = Math.cos(Math.toRadians(-target / ticks_in_degrees)) * f2;
             double power2 = pid2 + ff2;
 
-            fieldCentric(drive, poseEstimate);
+            //fieldCentric(drive, poseEstimate);
             // Update everything. Odometry. Etc.
-            drive.update();
+            //drive.update();
 
 
             if (gamepad2.left_stick_y != 0) {
@@ -200,14 +243,19 @@ public class Strafe extends LinearOpMode {
                 robot.claw.setPosition(robot.clawClosed);
             }
             if (gamepad2.a) { // Move arm to the inside
-                robot.arm1.setPosition(.96);
-                robot.arm2.setPosition(.04);
+                robot.arm1.setPosition(1 - robot.yPos1);
+                robot.arm2.setPosition(robot.yPos1);
                 robot.wrist.setPosition(robot.wristInside);
             }
             if (gamepad2.y) { // Move arm to the outside
-                robot.arm1.setPosition(robot.yPos1);
+                robot.arm1.setPosition(1 - robot.yPos2);
                 robot.arm2.setPosition(robot.yPos2);
                 robot.wrist.setPosition(robot.wristOutside);
+            }
+            if (gamepad2.b) { // Move arm to the outside
+                robot.arm1.setPosition(1 - robot.yPos3);
+                robot.arm2.setPosition(robot.yPos3);
+                robot.wrist.setPosition(robot.wristOutside2);
             }
             // Move down one pixel
             if (gamepad2.dpad_down && gamepad2.dpad_down != prevDDown && gamepad2.right_stick_y == 0) {
@@ -225,35 +273,94 @@ public class Strafe extends LinearOpMode {
                 robot.arm1.setPosition(robot.arm1.getPosition() - robot.onePixel);
                 robot.arm2.setPosition(robot.arm2.getPosition() + robot.onePixel);
             }
-
             prevDDown = gamepad2.dpad_down;
             prevDUp = gamepad2.dpad_up;
+
+            fieldOverlay.setStroke("#3F51B5");
+            DashboardUtil.drawRobot(fieldOverlay, poseEstimate);
+
+            drive.setWeightedDrivePower(driveDirection);
+
+            // Update the heading controller with our current heading
+            headingController.update(poseEstimate.getHeading());
+
+            // Update he localizer
+            drive.getLocalizer().update();
+
+            // Send telemetry packet off to dashboard
+            FtcDashboard.getInstance().sendTelemetryPacket(packet);
+
             // Print pose to telemetry
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
-            PoseStorage.currentPose = drive.getPoseEstimate();
+            telemetry.update();
+            //PoseStorage.currentPose = drive.getPoseEstimate();
 
-            updateTelemetry(telemetry);
+            //updateTelemetry(telemetry);
         }
 
     }
-    public void alignToPoint() {
+    public Pose2d alignToPoint(Pose2d poseEstimate, Canvas fieldOverlay) {
+        Pose2d driveDirection;
+        // Create a vector from the gamepad x/y inputs which is the field relative movement
+        // Then, rotate that vector by the inverse of that heading for field centric control
+        Vector2d fieldFrameInput = new Vector2d(
+                gamepad1.left_stick_x,
+                -gamepad1.left_stick_y
+        );
+        Vector2d robotFrameInput = fieldFrameInput.rotated(-poseEstimate.getHeading());
 
+        // Difference between the target vector and the bot's position
+        Vector2d difference = targetPosition.minus(poseEstimate.vec());
+        // Obtain the target angle for feedback and derivative for feedforward
+        double theta = difference.angle();
+
+        // Not technically omega because its power. This is the derivative of atan2
+        double thetaFF = -fieldFrameInput.rotated(-Math.PI / 2).dot(difference) / (difference.norm() * difference.norm());
+
+        // Set the target heading for the heading controller to our desired angle
+        headingController.setTargetPosition(theta);
+
+        // Set desired angular velocity to the heading controller output + angular
+        // velocity feedforward
+        double headingInput = (headingController.update(poseEstimate.getHeading())
+                * DriveConstants.kV + thetaFF)
+                * DriveConstants.TRACK_WIDTH;
+
+        // Combine the field centric x/y velocity with our derived angular velocity
+        driveDirection = new Pose2d(
+                robotFrameInput,
+                headingInput
+        );
+
+        // Draw the target on the field
+        fieldOverlay.setStroke("#dd2c00");
+        fieldOverlay.strokeCircle(targetPosition.getX(), targetPosition.getY(), DRAWING_TARGET_RADIUS);
+
+        // Draw lines to target
+        fieldOverlay.setStroke("#b89eff");
+        fieldOverlay.strokeLine(targetPosition.getX(), targetPosition.getY(), poseEstimate.getX(), poseEstimate.getY());
+        fieldOverlay.setStroke("#ffce7a");
+        fieldOverlay.strokeLine(targetPosition.getX(), targetPosition.getY(), targetPosition.getX(), poseEstimate.getY());
+        fieldOverlay.strokeLine(targetPosition.getX(), poseEstimate.getY(), poseEstimate.getX(), poseEstimate.getY());
+
+        return driveDirection;
     }
-    public void fieldCentric(SampleMecanumDrive drive, Pose2d poseEstimate){
+    public Pose2d fieldCentric(SampleMecanumDrive drive, Pose2d poseEstimate){
         // Drive code off of GM-zero
 
 
         // Create a vector from the gamepad x/y inputs
         // Then, rotate that vector by the inverse of that heading
         Vector2d input = new Vector2d(
-                -gamepad1.left_stick_x,
-                gamepad1.left_stick_y
+                gamepad1.left_stick_x,
+                -gamepad1.left_stick_y
         ).rotated(-poseEstimate.getHeading());
 
         // Pass in the rotated input + right stick value for rotation
         // Rotation is not part of the rotated input thus must be passed in separately
+        /*
         drive.setWeightedDrivePower(
                 new Pose2d(
                         input.getX(),
@@ -261,12 +368,26 @@ public class Strafe extends LinearOpMode {
                         -gamepad1.right_stick_x
                 )
         );
-
+         */
+        return new Pose2d(
+                input.getX(),
+                input.getY(),
+                -gamepad1.right_stick_x
+        );
     }
-    public void robotCentric(){
+    public Pose2d robotCentric(){
+        /*
         double y1 = gamepad1.left_stick_y; // Remember, Y stick value is reversed, but driving was reversed so I un negatived it
         double x1 = -gamepad1.left_stick_x * 1.1; // Negative because stafing was reversed
         double rx = -gamepad1.right_stick_x;
+        */
+        Pose2d driveDirection;
+        driveDirection = new Pose2d(
+                -gamepad1.left_stick_y,
+                -gamepad1.left_stick_x,
+                -gamepad1.right_stick_x
+        );
+        return driveDirection;
     }
 }
 
