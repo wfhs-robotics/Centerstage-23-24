@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors.Autonomous;
 
-import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen1;
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.*;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen2;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.onePixel;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.wristInside;
@@ -44,14 +44,30 @@ import java.util.List;
 @Autonomous(name = "BlueBoard", group = "Pushbot")
 public class BlueBoard extends LinearOpMode {
     public static double DISTANCE = 36.5; // in
-    public static double toBoard = 42.5;
+    public static double toBoard = 25;
     public static double wristNum= .45;
-    public static String spike = "Left";
-    public static double rightReverse = 20.5;
+    public static double rightReverse = 42.5;
     public static double leftReverse = 2;
+    public static double dis1 = 18;
+    public static double dis2 = 25;
     public static double rightBoardStrafe = 13;
-    public static double parkDistance = 31;
-    public static boolean dev = true;
+    public static double parkDistance = 15;
+    /* Flags, one for spike for dev mode, PIXELPOS is to be updated before every match. */
+    public static String spike = "Left";
+    public static String PIXELPOS = "Left";
+    /* Default strafe to the left side. */
+    public static double middleStrafe = 8;
+    public static double leftStrafe = 2;
+    public static double rightStrafe = 4;
+
+    /* All Board stacking positions. <spike><boardPos>Y */
+    public static double middleLeftStrafe = 6;
+    public static double middleRightStrafe = 8;
+    public static double rightLeftStrafe = 1;
+    public static double rightRightStrafe = 0.1;
+    public static double leftLeftStrafe = 7;
+    public static double leftRightStrafe = 5;
+    public static boolean dev = false;
     double cX = 0;
     double cY = 0;
     double width = 0;
@@ -70,8 +86,20 @@ public class BlueBoard extends LinearOpMode {
         robot.init(hardwareMap);
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        if (PIXELPOS.equals("Left")) {
+            middleStrafe =  middleLeftStrafe;
+            leftStrafe = leftLeftStrafe;
+            rightStrafe = rightLeftStrafe;
+            telemetry.addData("Pixel Position: ", "Left");
+        } else {
+            middleStrafe = middleRightStrafe;
+            leftStrafe = leftRightStrafe;
+            rightStrafe = rightRightStrafe;
+            telemetry.addData("Pixel Position: ", "Right");
+        }
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Pose2d startPose = new Pose2d(14, -62, Math.toRadians(90));
+        Pose2d startPose = new Pose2d(14, 62, Math.toRadians(90));
         drive.setPoseEstimate(startPose);
 
 
@@ -82,15 +110,20 @@ public class BlueBoard extends LinearOpMode {
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
-                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                    robot.arm1.setPosition(robot.arm1.getPosition() - (onePixel * 2));
                 })
                 .addTemporalMarker(() -> {
-                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                    robot.arm2.setPosition(robot.arm2.getPosition() + (onePixel * 2));
                 })
+
                 .back(6)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .turn(Math.toRadians(-90))
                 .back(42.5)
-                .strafeLeft(4)
+                .strafeLeft(middleStrafe)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -115,24 +148,73 @@ public class BlueBoard extends LinearOpMode {
                     robot.wrist.setPosition(wristInside);
                 })
                 .forward(2)
-                .strafeRight(parkDistance)
+                .strafeRight(25)
                 .build();
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
                 .forward(36.5)
                 .turn(Math.toRadians(-90))
-                .back(20.5)
+                .forward(1)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
-                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                    robot.arm1.setPosition(robot.arm1.getPosition() - (onePixel * 2));
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + (onePixel * 2));
+                })
+
+                .back(1)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
+                .back(41.5 + 2)
+                .strafeRight(rightStrafe)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristNum);
+                })
+                .waitSeconds(1)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen2);
+                })
+                .waitSeconds(0.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(yPos2);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(yPos1);
+                })
+                .addTemporalMarker(() -> {
+                    robot.wrist.setPosition(wristInside);
+                })
+                .forward(4)
+                .strafeRight(28)
+                .back(2)
+                .build();
+                /*
+                .forward(31.5)
+                .turn(Math.toRadians(-90))
+                .forward(5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel );
                 })
                 .addTemporalMarker(() -> {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
-                .back(toBoard - 20.5)
-                .strafeRight(rightBoardStrafe)
+                .back(toBoard)
+                .strafeLeft(rightStrafe)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -158,24 +240,35 @@ public class BlueBoard extends LinearOpMode {
                 })
                 .forward(2)
                 .strafeRight(parkDistance)
+                .back(2)
                 .build();
 
+                 */
+
+
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)
-                .forward(DISTANCE)
+                .forward(5)
+                .strafeLeft(18)
+                .forward(28)
                 .turn(Math.toRadians(-90))
-                .forward(leftReverse)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
-                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                    robot.arm1.setPosition(robot.arm1.getPosition() - (onePixel * 2));
                 })
                 .addTemporalMarker(() -> {
-                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                    robot.arm2.setPosition(robot.arm2.getPosition() + (onePixel * 2));
                 })
-                .back(toBoard + leftReverse)
-                .strafeLeft(2)
+
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
+                .back(21)
+                .strafeRight(leftStrafe)
+                .back(4)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -199,8 +292,9 @@ public class BlueBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristInside);
                 })
-                .strafeRight(31)
                 .forward(2)
+                .strafeRight(18)
+                .back(2)
                 .build();
 
 
@@ -210,20 +304,22 @@ public class BlueBoard extends LinearOpMode {
         if (isStopRequested()) return;
 
         if(!dev) {
-            if (cX > 570 && cY > 80 && cY < 250) {
-                drive.followTrajectorySequence(middle);
-                controlHubCam.stopStreaming();
-                controlHubCam.closeCameraDevice();
-                telemetry.addData("detect", "middle");
+            if (cX >= 0 && cX < 400) {
+                telemetry.addData("Status", "Left");
                 telemetry.update();
-            } else if (cX < 400 && cY > 80 && cY < 250) {
                 drive.followTrajectorySequence(left);
-                telemetry.addData("detect", "left");
+            } else if (cX >= 400 && cX < 800) {
+                telemetry.addData("Status", "Middle");
                 telemetry.update();
-            } else {
+                drive.followTrajectorySequence(middle);
+
+            } else if(cX >= 800) {
+                telemetry.addData("Status", "Right");
+                telemetry.update();
                 drive.followTrajectorySequence(right);
-                telemetry.addData("detect", "right");
-                telemetry.update();
+            } else {
+                drive.followTrajectorySequence(middle);
+                telemetry.addData("Status", "Detected no element, running middle path.");
             }
         } else {
             if (spike.equals("Middle"))
@@ -311,7 +407,7 @@ public class BlueBoard extends LinearOpMode {
 
 
             Mat yellowMask = new Mat();
-            Core.inRange(hsvFrame, lowerRed, upperRed, yellowMask);
+            Core.inRange(hsvFrame, lowerBlue, upperBlue, yellowMask);
 
             Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
             Imgproc.morphologyEx(yellowMask, yellowMask, Imgproc.MORPH_OPEN, kernel);

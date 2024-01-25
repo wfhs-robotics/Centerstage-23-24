@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors.Autonomous;
 
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawClosed;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen1;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen2;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.onePixel;
@@ -57,11 +58,11 @@ public class RedPlane extends LinearOpMode {
     public static double rightY = -23;
 
     /* All Board stacking positions. <spike><boardPos>Y */
-    public static double middleLeftY = -36.25;
-    public static double middleRightY = -39;
+    public static double middleLeftY = -37.25;
+    public static double middleRightY = -40;
     public static double middleAngle = 173;
-    public static double rightLeftY = -33.5;
-    public static double rightRightY = -34.5;
+    public static double rightLeftY = -37;
+    public static double rightRightY = -38;
     public static double leftLeftY = -23;
     public static double leftRightY = -28;
     public static double wristNum= .45;
@@ -108,6 +109,7 @@ public class RedPlane extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)
+                .waitSeconds(8)
                 .forward(31.5)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
@@ -120,6 +122,10 @@ public class RedPlane extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(5)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .strafeLeft(13)
                 .forward(33.5)
                 .turn(Math.toRadians(90))
@@ -159,6 +165,7 @@ public class RedPlane extends LinearOpMode {
                 .build();
 
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
+                .waitSeconds(8)
                 .forward(32.5)
                 .turn(Math.toRadians(-90))
                 .forward(.1)
@@ -173,6 +180,10 @@ public class RedPlane extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(5)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .strafeLeft(23)
                 .forward(30)
                 .splineToLinearHeading(new Pose2d(59, rightY, Math.toRadians(180)), Math.toRadians(0),
@@ -207,6 +218,7 @@ public class RedPlane extends LinearOpMode {
                 .build();
 
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)
+                .waitSeconds(8)
                 .forward(34.5)
                 .turn(Math.toRadians(90))
                 .back(3.5)
@@ -221,6 +233,10 @@ public class RedPlane extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(5)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .strafeRight(22.5)
                 .back(40.5)
                 .splineToLinearHeading(new Pose2d(59, leftY, Math.toRadians(180)), Math.toRadians(0),

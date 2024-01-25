@@ -1,11 +1,7 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors.Autonomous;
 
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen1;
-import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen2;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.onePixel;
-import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.wristInside;
-import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.yPos1;
-import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.yPos2;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -79,10 +75,60 @@ public class BluePlane extends LinearOpMode {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        Pose2d startPose = new Pose2d(-37.5, -61.5, Math.toRadians(90));
+        Pose2d startPose = new Pose2d(-37.5, 61.5, Math.toRadians(90));
         drive.setPoseEstimate(startPose);
 
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)
+                .forward(31.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(5)
+//                .strafeRight(13)
+//                .forward(33.5)
+//                .turn(Math.toRadians(-90))
+//                .back(50)
+//                .lineToLinearHeading(new Pose2d(59, 36.25, Math.toRadians(187)),
+//                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+//                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
+//                //.splineToLinearHeading(new Pose2d(x1,y1), Math.toRadians(a1),
+//                //SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+//                // SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristNum);
+//                })
+//                .waitSeconds(1)
+//                .addTemporalMarker(() -> {
+//                    robot.claw.setPosition(clawOpen2);
+//                })
+//                .waitSeconds(0.5)
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristInside);
+//                })
+//                .forward(5)
+//                .strafeLeft(25)
+//                .back(5)
+                .build();
+                /*
                 .forward(31.5)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen1);
@@ -127,8 +173,58 @@ public class BluePlane extends LinearOpMode {
                 .strafeLeft(25)
                 .back(5)
                 .build();
+                */
+
 
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
+                .forward(34.5)
+                .turn(Math.toRadians(-90))
+                .back(3.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(5)
+//                .strafeLeft(22.5)
+//                .back(40.5)
+//                .splineToLinearHeading(new Pose2d(59, 33.5, Math.toRadians(180)), Math.toRadians(0),
+//                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+//                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristNum);
+//                })
+//                .waitSeconds(1)
+//                .addTemporalMarker(() -> {
+//                    robot.claw.setPosition(clawOpen2);
+//                })
+//                .waitSeconds(0.5)
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristInside);
+//                })
+//                .forward(5)
+//                .strafeLeft(20)
+//                .back(5)
+                .build();
+
+                /*
                 .forward(32.5)
                 .turn(Math.toRadians(90))
                 .forward(1)
@@ -174,7 +270,57 @@ public class BluePlane extends LinearOpMode {
                 .back(5)
                 .build();
 
+                 */
+
         TrajectorySequence left = drive.trajectorySequenceBuilder(startPose)
+                .forward(32.5)
+                .turn(Math.toRadians(90))
+                .forward(.1)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawOpen1);
+                })
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.arm1.setPosition(robot.arm1.getPosition() - onePixel);
+                })
+                .addTemporalMarker(() -> {
+                    robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
+                })
+                .back(5)
+//                .strafeRight(23)
+//                .forward(30)
+//                .splineToLinearHeading(new Pose2d(59, 23, Math.toRadians(180)), Math.toRadians(0),
+//                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+//                        SampleMecanumDrive.getAccelerationConstraint((DriveConstants.MAX_ACCEL)))
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristNum);
+//                })
+//                .waitSeconds(1)
+//                .addTemporalMarker(() -> {
+//                    robot.claw.setPosition(clawOpen2);
+//                })
+//                .waitSeconds(0.5)
+//                .addTemporalMarker(() -> {
+//                    robot.arm1.setPosition(yPos2);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.arm2.setPosition(yPos1);
+//                })
+//                .addTemporalMarker(() -> {
+//                    robot.wrist.setPosition(wristInside);
+//                })
+//                .forward(5)
+//                .strafeLeft(30)
+//                .back(5)
+                .build();
+
+                /*
                 .forward(34.5)
                 .turn(Math.toRadians(90))
                 .back(3)
@@ -219,7 +365,7 @@ public class BluePlane extends LinearOpMode {
                 .strafeRight(18)
                 .back(5)
                 .build();
-
+                 */
 
         initOpenCV();
         FtcDashboard.getInstance().startCameraStream(controlHubCam, 30);
@@ -272,6 +418,7 @@ public class BluePlane extends LinearOpMode {
         controlHubCam.setPipeline(new DetectionPipeline());
 
         controlHubCam.openCameraDevice();
+        telemetry.addData("camera", "on");
         controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPRIGHT);
     }
     class DetectionPipeline extends OpenCvPipeline {
@@ -327,7 +474,7 @@ public class BluePlane extends LinearOpMode {
 
 
             Mat yellowMask = new Mat();
-            Core.inRange(hsvFrame, lowerRed, upperRed, yellowMask);
+            Core.inRange(hsvFrame, lowerBlue, upperBlue, yellowMask);
 
             Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
             Imgproc.morphologyEx(yellowMask, yellowMask, Imgproc.MORPH_OPEN, kernel);

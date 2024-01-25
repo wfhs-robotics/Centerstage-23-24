@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TechnicalTerrors.Autonomous;
 
+import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawClosed;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen1;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.clawOpen2;
 import static org.firstinspires.ftc.teamcode.TechnicalTerrors.Hardware.onePixel;
@@ -46,13 +47,28 @@ import java.util.List;
 @Autonomous(name = "RedBoard", group = "Pushbot")
 public class RedBoard extends LinearOpMode {
     public static double DISTANCE = 36.5; // in
+    public static double dis = 26.5;
+    public static double dis2 = 20;
     public static double toBoard = 42.5;
     public static double wristNum= .45;
+    /* Flags, one for spike for dev mode, PIXELPOS is to be updated before every match. */
     public static String spike = "Left";
-    public static double rightReverse = 20.5;
+    public static String PIXELPOS = "Left";
     public static double leftReverse = 2;
     public static double rightBoardStrafe = 13;
     public static double parkDistance = 31;
+    /* Default strafe to the left side. */
+    public static double middleStrafe = 8;
+    public static double leftStrafe = 2;
+    public static double rightStrafe = 4;
+
+    /* All Board stacking positions. <spike><boardPos>Y */
+    public static double middleLeftStrafe = 8;
+    public static double middleRightStrafe = 4;
+    public static double rightLeftStrafe = 2;
+    public static double rightRightStrafe = 9.5;
+    public static double leftLeftStrafe = 2;
+    public static double leftRightStrafe = 0.1;
     public static boolean dev = false;
     double cX = 0;
     double cY = 0;
@@ -75,6 +91,18 @@ public class RedBoard extends LinearOpMode {
         robot.init(hardwareMap);
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
+        if (PIXELPOS.equals("Left")) {
+            middleStrafe =  middleLeftStrafe;
+            leftStrafe = leftLeftStrafe;
+            rightStrafe = rightLeftStrafe;
+            telemetry.addData("Pixel Position: ", "Left");
+        } else {
+            middleStrafe = middleRightStrafe;
+            leftStrafe = leftRightStrafe;
+            rightStrafe = rightRightStrafe;
+            telemetry.addData("Pixel Position: ", "Right");
+        }
+
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         Pose2d startPose = new Pose2d(14, -62, Math.toRadians(90));
         drive.setPoseEstimate(startPose);
@@ -83,7 +111,7 @@ public class RedBoard extends LinearOpMode {
         TrajectorySequence middle = drive.trajectorySequenceBuilder(startPose)
                 .forward(31.5)
                 .addTemporalMarker(() -> {
-                    robot.claw.setPosition(clawOpen1);
+                    robot.claw.setPosition(clawOpen1 + 0.01);
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
@@ -93,9 +121,13 @@ public class RedBoard extends LinearOpMode {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
                 .back(6)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .turn(Math.toRadians(90))
                 .back(42.5)
-                .strafeRight(x1)
+                .strafeRight(4)
                 .addTemporalMarker(() -> {
                    robot.arm1.setPosition(yPos1);
                 })
@@ -105,7 +137,7 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristNum);
                 })
-                .waitSeconds(1)
+                .waitSeconds(2)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen2);
                 })
@@ -120,15 +152,16 @@ public class RedBoard extends LinearOpMode {
                     robot.wrist.setPosition(wristInside);
                 })
                 .forward(2)
-                .strafeLeft(parkDistance)
+                .strafeRight(20)
                 .back(2)
                 .build();
         TrajectorySequence right = drive.trajectorySequenceBuilder(startPose)
-                .forward(36.5)
+                .forward(5)
+                .strafeRight(18)
+                .forward(25)
                 .turn(Math.toRadians(90))
-                .back(20.5)
                 .addTemporalMarker(() -> {
-                    robot.claw.setPosition(clawOpen1);
+                    robot.claw.setPosition(clawOpen1+ 0.01);
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
@@ -137,8 +170,14 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
-                .back(toBoard - 20.5)
-                .strafeLeft(x2)
+
+                .back(22)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
+                .strafeLeft(rightStrafe)
+                .back(3.5)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
                 })
@@ -148,7 +187,7 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristNum);
                 })
-                .waitSeconds(1)
+                .waitSeconds(2)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen2);
                 })
@@ -162,8 +201,8 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristInside);
                 })
-                .forward(2)
-                .strafeLeft(parkDistance)
+                .forward(4)
+                .strafeLeft(18)
                 .back(2)
                 .build();
 
@@ -172,7 +211,7 @@ public class RedBoard extends LinearOpMode {
                 .turn(Math.toRadians(90))
                 .forward(leftReverse)
                 .addTemporalMarker(() -> {
-                    robot.claw.setPosition(clawOpen1);
+                    robot.claw.setPosition(clawOpen1+ 0.01);
                 })
                 .waitSeconds(.5)
                 .addTemporalMarker(() -> {
@@ -181,7 +220,12 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.arm2.setPosition(robot.arm2.getPosition() + onePixel);
                 })
+
                 .back(toBoard + leftReverse)
+                .waitSeconds(.5)
+                .addTemporalMarker(() -> {
+                    robot.claw.setPosition(clawClosed);
+                })
                 .strafeRight(x3)
                 .addTemporalMarker(() -> {
                     robot.arm1.setPosition(yPos1);
@@ -192,7 +236,7 @@ public class RedBoard extends LinearOpMode {
                 .addTemporalMarker(() -> {
                     robot.wrist.setPosition(wristNum);
                 })
-                .waitSeconds(1)
+                .waitSeconds(2)
                 .addTemporalMarker(() -> {
                     robot.claw.setPosition(clawOpen2);
                 })

@@ -72,29 +72,29 @@ public class MeepMeepTesting {
                 .setConstraints(52.48180821614297, 52.48180821614297, 3.5906233757563073, 3.5906233757563073, 13.19)
                 .setColorScheme(new ColorSchemeBlueDark())
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-37.5, 61.5, Math.toRadians(-90)))
-                                .forward(31.5)
-                                .back(5)
-                                .strafeRight(13)
-                                .forward(25.5)
-                                .turn(Math.toRadians(90))
-                                .forward(40.5)
-                                .splineToLinearHeading(new Pose2d(54,37, Math.toRadians(180)), Math.toRadians(0))
-                                .waitSeconds(1)
-                                .forward(5)
-                                .strafeLeft(25)
-                                .back(5)
-                                .build());
+                        drive.trajectorySequenceBuilder(new Pose2d(15, -61.3, Math.toRadians(90)))
+                .forward(31.5)
+                .waitSeconds(.5)
+                .back(6)
+                .waitSeconds(.5)
+                .turn(Math.toRadians(90))
+                .back(42.5)
+                .strafeRight(4)
+                .waitSeconds(0.5)
+                .forward(2)
+                .strafeRight(20)
+                .back(2)
+                .build());
 
 
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_CENTERSTAGE_JUICE_DARK)
                 .setDarkMode(true)
                 .setBackgroundAlpha(0.95f)
-                .addEntity(blueBoard)
+                //.addEntity(blueBoard)
                 .addEntity(bluePlane)
-                .addEntity(redAudience)
-                .addEntity(redAlliance)
+                //.addEntity(redAudience)
+                //.addEntity(redAlliance)
                 .start();
     }
 }

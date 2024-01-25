@@ -129,6 +129,7 @@ public class Hardware
         arm1.setPosition(1 - yPos1);
         arm2.setPosition(yPos1);
         claw.setPosition(clawClosed);
+        //arm1.setDirection(Servo.Direction.REVERSE);
 
 
         // Set all motors to run without encoders.
