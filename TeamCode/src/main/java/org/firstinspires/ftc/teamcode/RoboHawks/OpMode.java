@@ -29,14 +29,17 @@
 
 package org.firstinspires.ftc.teamcode.RoboHawks;
 
-import static org.firstinspires.ftc.teamcode.RoboHawks.Hardware.*;
+import static org.firstinspires.ftc.teamcode.RoboHawks.HardwareRH.*;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import java.util.Objects;
 
 
 /**
@@ -77,18 +80,25 @@ public class OpMode extends LinearOpMode {
     private PIDController controller2;
     public static double p = 0.004, i = 0, d = 0.0001;
     public static double f = 0.11;
-    public static double p2 = 0.004, i2 = 0, d2 = 0.0001;
-    public static double f2 = 0.11;
+    public static double p2 = 0, i2 = 0, d2 = 0;
+    public static double f2 = 0.05;
 
     public static int target = 0;
     public static int target2 = 0;
     private final double ticks_in_degrees = 1425.1 / 360;
     boolean plane = false;
+    boolean stop = true;
     boolean prevA = false;
     boolean prevLeftBumper = false;
     boolean prevRightBumper = false;
+    Directions hangMode = Directions.STOP;
+    enum Directions {
+        UP,
+        DOWN,
+        STOP
+    }
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    org.firstinspires.ftc.teamcode.RoboHawks.Hardware robot = new org.firstinspires.ftc.teamcode.RoboHawks.Hardware();
+    org.firstinspires.ftc.teamcode.RoboHawks.HardwareRH robot = new org.firstinspires.ftc.teamcode.RoboHawks.HardwareRH();
 
     // Create a RobotHardware object to be used to access robot hardware.
     // Prefix any hardware functions with "robot." to access this class.
@@ -98,6 +108,8 @@ public class OpMode extends LinearOpMode {
     public void runOpMode() {
         controller = new PIDController(p, i, d);
         controller2 = new PIDController(p2, i2, d2);
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         // Send telemetry message to signify robot waiting;
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -112,17 +124,16 @@ public class OpMode extends LinearOpMode {
             robot.leftForwardDrive.setDirection(DcMotorSimple.Direction.REVERSE);
             robot.leftDrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
+
             waitForStart();
 
             if (isStopRequested()) return;
 
             while (opModeIsActive()) {
                 double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-                double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+                double x = -gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
                 double rx = gamepad1.right_stick_x;
 
-                // Arm Code is from: <insert link>
-                // Drive Code is from: <insert link>
                 controller.setPID(p, i, d);
                 int armPos = robot.arm.getCurrentPosition();
                 double pid = controller.calculate(armPos, target);
@@ -131,9 +142,13 @@ public class OpMode extends LinearOpMode {
 
                 controller2.setPID(p2, i2, d2);
                 int armPos2 = robot.slide.getCurrentPosition();
-                double pid2 = controller.calculate(armPos2, -target2);
+                double pid2 = controller2.calculate(armPos2, target2);
                 double ff2 = Math.cos(Math.toRadians(-target2 / ticks_in_degrees)) * f2;
                 double power2 = pid2 + ff2;
+
+                // Arm Code is from: <insert link>
+                // Drive Code is from: <insert link>
+
 
                 if (gamepad2.left_stick_y != 0) {
                     robot.arm.setPower(-gamepad2.left_stick_y);
@@ -141,10 +156,10 @@ public class OpMode extends LinearOpMode {
                 } else {
                     robot.arm.setPower(power);
                 }
+
                 if (gamepad2.right_stick_y != 0) {
-                    robot.arm.setPower(-gamepad2.left_stick_y);
-                    robot.slide.setPower(gamepad2.left_stick_y);
-                    target2 = armPos;
+                    robot.slide.setPower(gamepad2.right_stick_y);
+                    target2 = armPos2;
                 } else {
                     robot.slide.setPower(power2);
                 }
@@ -160,45 +175,78 @@ public class OpMode extends LinearOpMode {
                 if (gamepad1.a && gamepad1.a != prevA) {
                     plane = !plane;
                 }
-                if (gamepad1.right_bumper && gamepad1.right_bumper != prevA) {
-                    robot.hangRotate.setPower(0);
+                if (gamepad1.right_bumper && gamepad1.right_bumper != prevRightBumper) {
+                    if (Objects.requireNonNull(hangMode) == Directions.STOP) {
+                        hangMode = Directions.DOWN;
+                    } else {
+                        hangMode = Directions.STOP;
+                    }
                 }
-                if (gamepad1.left_bumper && gamepad1.left_bumper!= prevA) {
-                    robot.hangRotate.setPower(1);
+                if (gamepad1.left_bumper && gamepad1.left_bumper!= prevLeftBumper) {
+                    if (Objects.requireNonNull(hangMode) == Directions.STOP) {
+                        hangMode = Directions.UP;
+                    } else {
+                        hangMode = Directions.STOP;
+                    }
                 }
+
                 if(gamepad1.left_trigger > 0) {
-                    robot.hangSpin.setPower(gamepad1.left_trigger);
+                    robot.hangRotate.setPower(gamepad1.left_trigger);
                 }
                 if(gamepad1.right_trigger > 0) {
-                    robot.hangSpin.setPower(gamepad1.right_trigger);
+                    robot.hangRotate.setPower(gamepad1.right_trigger);
                 }
-//                if(plane) {
-//                    robot.plane.setPower(.8);
-//                }
-//                if(!plane) {
-//                    robot.plane.setPower(0);
-//                }
+
+                switch(hangMode) {
+                    case UP:
+                        robot.hangSpin.setDirection(DcMotorSimple.Direction.FORWARD);
+                        robot.hangSpin.setPower(1);
+                        break;
+                    case DOWN:
+                        robot.hangSpin.setDirection(DcMotorSimple.Direction.REVERSE);
+                        robot.hangSpin.setPower(1);
+                        break;
+                    case STOP:
+                        robot.hangSpin.setPower(0);
+                        break;
+                    }
+                if(plane) {
+                    robot.plane.setPower(1);
+                }
+                if(!plane) {
+                    robot.plane.setPower(0);
+                }
 
 
                 // Denominator is the largest motor power (absolute value) or 1
                 // This ensures all the powers maintain the same ratio,
+
                 // but only if at least one is out of the range [-1, 1]
                 double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
                 double frontLeftPower = (y + x + rx) / denominator;
                 double backLeftPower = (y - x + rx) / denominator;
                 double frontRightPower = (y - x - rx) / denominator;
                 double backRightPower = (y + x - rx) / denominator;
-
-                robot.leftForwardDrive.setPower(frontLeftPower);
-                robot.leftDrive.setPower(backLeftPower);
-                robot.rightForwardDrive.setPower(frontRightPower);
-                robot.rightDrive.setPower(backRightPower);
-                robot.arm.setPower(power);
-                robot.slide.setPower(power2);
+                if(gamepad1.left_stick_y != 0) {
+                    robot.leftForwardDrive.setPower(-frontLeftPower);
+                    robot.leftDrive.setPower(backLeftPower);
+                    robot.rightForwardDrive.setPower(-frontRightPower);
+                    robot.rightDrive.setPower(backRightPower);
+                } else {
+                    robot.leftForwardDrive.setPower(frontLeftPower);
+                    robot.leftDrive.setPower(backLeftPower);
+                    robot.rightForwardDrive.setPower(frontRightPower);
+                    robot.rightDrive.setPower(backRightPower);
+                }
 
                 prevA = gamepad1.a;
                 prevLeftBumper = gamepad1.left_bumper;
                 prevRightBumper = gamepad1.right_bumper;
+                telemetry.addData("target", target);
+                telemetry.addData("target2", target2);
+                telemetry.addData("arm", robot.arm.getCurrentPosition());
+                telemetry.addData("test1", "test1");
+                updateTelemetry(telemetry);
             }
         }
     }

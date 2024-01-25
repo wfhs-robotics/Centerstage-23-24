@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.RoboHawks;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -51,7 +52,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Servo channel:  Servo to open left claw:  "left_hand"
  * Servo channel:  Servo to open right claw: "right_hand"
  */
-public class Hardware
+@Config
+public class HardwareRH
 {
     /* Public OpMode members. */
     public DcMotor  leftDrive   = null;
@@ -75,7 +77,7 @@ public class Hardware
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public Hardware(){
+    public HardwareRH(){
 
     }
 
@@ -94,7 +96,7 @@ public class Hardware
         hangSpin = hwMap.get(DcMotor.class, "hangSpin");
         hangRotate = hwMap.get(DcMotor.class, "handRotate");
         claw = hwMap.get(Servo.class, "claw");
-//        plane = hwMap.get(CRServo.class, "plane");
+        plane = hwMap.get(CRServo.class, "plane");
 
 
 
@@ -122,7 +124,8 @@ public class Hardware
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightForwardDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
 
